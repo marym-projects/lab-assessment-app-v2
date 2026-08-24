@@ -11,6 +11,45 @@
 {% block content %}
 
 <style>
+
+/* =========================================================
+   FINAL SECTION HEADING ALIGNMENT FIX
+   Keep A1/A2/A3 (and all assessment section headers) on the
+   LEFT.  This explicitly overrides inherited RTL/flex styles.
+========================================================= */
+
+.assessment-wizard .section-title,
+.assessment-wizard .checklist-header {
+    direction: ltr !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    width: 100% !important;
+}
+
+.assessment-wizard .section-title > div {
+    direction: ltr !important;
+    text-align: left !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+.assessment-wizard .section-title h3,
+.assessment-wizard .section-title p,
+.assessment-wizard .section-title .section-label {
+    direction: ltr !important;
+    text-align: left !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.assessment-wizard .section-number {
+    flex: 0 0 40px !important;
+    margin-left: 0 !important;
+    margin-right: 12px !important;
+}
+
 /* =========================================================
    ASSESSMENT WIZARD
 ========================================================= */
@@ -169,23 +208,6 @@
 .section-title {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    text-align: left;
-}
-
-.section-title > div {
-    margin-left: 0;
-    text-align: left;
-}
-
-.wizard-page[data-step="4"] .section-title {
-    justify-content: flex-start;
-    text-align: left;
-}
-
-.wizard-page[data-step="4"] .section-title > div {
-    margin-left: 0;
-    text-align: left;
 }
 
 .section-number {
@@ -468,6 +490,63 @@
     color: #68717b;
 }
 
+
+
+/* =========================================================
+   RESPONSE RADIO ALIGNMENT
+   Keep Yes / Partial / No / N/A evenly aligned.
+========================================================= */
+
+.response-cell {
+    vertical-align: middle !important;
+    text-align: center !important;
+}
+
+.response-cell ul {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(48px, 1fr)) !important;
+    align-items: center !important;
+    justify-items: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.response-cell li {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.response-cell label {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    min-height: 24px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+}
+
+.response-cell input[type="radio"] {
+    appearance: auto !important;
+    -webkit-appearance: radio !important;
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    vertical-align: middle !important;
+    position: static !important;
+    transform: none !important;
+}
 
 /* =========================================================
    TEST KIT
@@ -818,48 +897,123 @@
             ============================================== -->
 
             <section class="assessment-card">
+
                 <div class="section-title">
-                    <div class="section-heading-left">
-                        <span class="section-number">A1</span>
-                        <div class="section-heading-text">
-                            <h3>Facility Information</h3>
-                            <p>Enter the MFL code to retrieve facility information where available.</p>
-                        </div>
+
+                    <span class="section-number">
+                        A1
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Facility Information
+                        </h3>
+
+                        <p>
+                            Enter the MFL code to retrieve facility
+                            information where available.
+                        </p>
+
                     </div>
+
                 </div>
 
+
                 <div class="facility-grid">
+
+
+                    <!-- MFL LOOKUP -->
+
                     <div class="mfl-lookup-box">
-                        <h4>Facility lookup</h4>
-                        <p>Enter the facility's unique MFL code. The system will retrieve the matching facility information.</p>
+
+                        <h4>
+                            Facility lookup
+                        </h4>
+
+                        <p>
+                            Enter the facility's unique MFL code.
+                            The system will retrieve the matching facility
+                            information.
+                        </p>
+
                         <div class="field-group">
-                            <label for="{{ info_form.facility_mfl_code.id_for_label }}">Facility MFL code</label>
+
+                            <label for="{{ info_form.facility_mfl_code.id_for_label }}">
+                                Facility MFL code
+                            </label>
+
                             {{ info_form.facility_mfl_code }}
+
                         </div>
-                        <div id="mfl-status" class="mfl-status"></div>
+
+                        <div
+                            id="mfl-status"
+                            class="mfl-status"
+                        ></div>
+
                     </div>
+
+
+                    <!-- FACILITY NAME -->
                     <div class="field-group">
-                        <label for="{{ info_form.facility_name.id_for_label }}">Facility Name</label>
+                        <label for="{{ info_form.facility_name.id_for_label }}">
+                            Facility Name
+                        </label>
+
                         {{ info_form.facility_name }}
-                        {% if info_form.facility_name.help_text %}<small class="field-help">{{ info_form.facility_name.help_text }}</small>{% endif %}
-                        {% if info_form.facility_name.errors %}<div class="field-error">{{ info_form.facility_name.errors }}</div>{% endif %}
+
+                        {% if info_form.facility_name.errors %}
+                            <div class="field-error">
+                                {{ info_form.facility_name.errors }}
+                            </div>
+                        {% endif %}
                     </div>
-                    <div class="field-group"><label for="{{ info_form.county_name.id_for_label }}">County</label>{{ info_form.county_name }}</div>
-                    <div class="field-group"><label for="{{ info_form.sub_county.id_for_label }}">Sub-county</label>{{ info_form.sub_county }}</div>
-                    <div class="field-group"><label for="{{ info_form.site.id_for_label }}">Site</label>{{ info_form.site }}</div>
-                    <div class="field-group"><label for="{{ info_form.assessment_type.id_for_label }}">Assessment Type</label>{{ info_form.assessment_type }}</div>
-                    <div class="field-group"><label for="{{ info_form.date_of_assessment.id_for_label }}">Date of Assessment</label>{{ info_form.date_of_assessment }}</div>
-                    <div class="field-group"><label for="{{ info_form.time_of_assessment.id_for_label }}">Time of Assessment</label>{{ info_form.time_of_assessment }}</div>
-                    <div class="field-group"><label for="{{ info_form.date_of_previous_assessment.id_for_label }}">Date of Previous Assessment</label>{{ info_form.date_of_previous_assessment }}</div>
-                    <div class="field-group"><label for="{{ info_form.facility_type.id_for_label }}">Facility Type</label>{{ info_form.facility_type }}</div>
-                    <div class="field-group"><label for="{{ info_form.facility_type_other.id_for_label }}">Facility Type — Other</label>{{ info_form.facility_type_other }}</div>
-                    <div class="field-group"><label for="{{ info_form.level.id_for_label }}">Level</label>{{ info_form.level }}</div>
-                    <div class="field-group"><label for="{{ info_form.affiliation.id_for_label }}">Affiliation</label>{{ info_form.affiliation }}</div>
-                    <div class="field-group"><label for="{{ info_form.affiliation_other.id_for_label }}">Affiliation — Other</label>{{ info_form.affiliation_other }}</div>
-                    <div class="field-group"><label for="{{ info_form.partner.id_for_label }}">Partner</label>{{ info_form.partner }}</div>
-                    <div class="field-group"><label for="{{ info_form.partner_specify.id_for_label }}">Partner — Specify</label>{{ info_form.partner_specify }}</div>
-                    <div class="field-group field-wide"><label for="{{ info_form.physical_address.id_for_label }}">Physical Address</label>{{ info_form.physical_address }}</div>
+
+
+                    <!-- FACILITY FIELDS -->
+
+                    {% for field in info_form %}
+
+                        {% if field.name not in a1_excluded_fields and field.name not in "facility_mfl_code facility_name" %}
+
+                            <div
+                                class="
+                                    field-group
+                                    {% if field.name == 'physical_address' %}
+                                        field-wide
+                                    {% elif field.name == 'poc_tests_conducted' %}
+                                        field-wide
+                                    {% endif %}
+                                "
+                            >
+
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <small class="field-help">
+                                        {{ field.help_text }}
+                                    </small>
+                                {% endif %}
+
+                                {% if field.errors %}
+                                    <div class="field-error">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
                 </div>
+
             </section>
 
 
@@ -870,13 +1024,24 @@
             <section class="assessment-card">
 
                 <div class="section-title">
-                    <div class="section-heading-left">
-                        <span class="section-number">A2</span>
-                        <div class="section-heading-text">
-                            <h3>Staff Members</h3>
-                            <p>Start with one row. Add additional staff members only when required.</p>
-                        </div>
+
+                    <span class="section-number">
+                        A2
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Staff Members
+                        </h3>
+
+                        <p>
+                            Start with one row. Add additional staff
+                            members only when required.
+                        </p>
+
                     </div>
+
                 </div>
 
 
@@ -1003,12 +1168,19 @@
             <section class="assessment-card">
 
                 <div class="section-title">
-                    <div class="section-heading-left">
-                        <span class="section-number">A3</span>
-                        <div class="section-heading-text">
-                            <h3>Interviewee &amp; POC Information</h3>
-                        </div>
+
+                    <span class="section-number">
+                        A3
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Interviewee & POC Information
+                        </h3>
+
                     </div>
+
                 </div>
 
 
@@ -1054,6 +1226,11 @@
                         </label>
 
                         {{ info_form.poc_tests_conducted }}
+
+                        <small class="field-help">
+                            Enter the POC tests conducted at this facility. The same test list
+                            is used to create the corresponding Section 8 test assessments.
+                        </small>
 
                     </div>
 
@@ -3055,6 +3232,222 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
 
+    /* =====================================================
+       A3 ↔ A4 POC TEST SYNCHRONISATION
+
+       A3's "List of POC tests conducted at this facility" is
+       intentionally linked to the A4 "Type of Test Performed"
+       rows. This prevents the same information being entered twice
+       and keeps both sections consistent.
+    ====================================================== */
+
+    const pocTestsField =
+        document.getElementById(
+            "{{ info_form.poc_tests_conducted.id_for_label }}"
+        );
+
+    /*
+     * A3 is the master list of POC tests.
+     *
+     * The same test names are reflected into:
+     *   A4  -> Type of Test Performed
+     *   Section 8 -> Name of pathogen/condition tested
+     *
+     * We keep existing A4 statistics and Section 8 answers where possible.
+     */
+
+    function getA3TestNames() {
+
+        if (!pocTestsField) {
+            return [];
+        }
+
+        return pocTestsField.value
+            .split(/[,;\n]+/)
+            .map(function (value) {
+                return value.trim();
+            })
+            .filter(function (value, index, array) {
+                return value && array.indexOf(value) === index;
+            });
+
+    }
+
+
+    function setA3TestNames(names) {
+
+        if (!pocTestsField) {
+            return;
+        }
+
+        const uniqueNames = [];
+
+        names.forEach(function (name) {
+
+            const clean =
+                (name || "").trim();
+
+            if (
+                clean &&
+                !uniqueNames.some(function (existing) {
+                    return existing.toLowerCase() === clean.toLowerCase();
+                })
+            ) {
+                uniqueNames.push(clean);
+            }
+
+        });
+
+        pocTestsField.value =
+            uniqueNames.join(", ");
+
+    }
+
+
+    /*
+     * A4 is intentionally independent.
+     *
+     * A4 contains POC testing statistics (period, test type,
+     * tests conducted, positives, negatives and comments). It is
+     * NOT the master list and is not automatically changed by A3.
+     */
+
+
+    function getSection8TestFields() {
+
+        if (!testkitContainer) {
+            return [];
+        }
+
+        return Array.from(
+            testkitContainer.querySelectorAll(
+                'input[name$="-pathogen_condition"], select[name$="-pathogen_condition"]'
+            )
+        );
+
+    }
+
+
+    function uniqueNonEmpty(values) {
+
+        const result = [];
+
+        values.forEach(function (value) {
+
+            const clean =
+                (value || "").trim();
+
+            if (
+                clean &&
+                !result.some(function (existing) {
+                    return existing.toLowerCase() === clean.toLowerCase();
+                })
+            ) {
+                result.push(clean);
+            }
+
+        });
+
+        return result;
+
+    }
+
+
+    /*
+     * A3 is the master list for Section 8 only.
+     *
+     * Example:
+     * A3 = HIV, Malaria, Hepatitis B
+     *
+     * Section 8 becomes:
+     *   Test Kit 1 -> HIV
+     *   Test Kit 2 -> Malaria
+     *   Test Kit 3 -> Hepatitis B
+     *
+     * Existing Section 8 cards are retained, so their 8.1-8.15
+     * answers are not wiped simply because A3 changes.
+     */
+    function syncA3ToSection8() {
+
+        if (!testkitContainer || !pocTestsField) {
+            return;
+        }
+
+        const names =
+            uniqueNonEmpty(
+                pocTestsField.value.split(/[,;\n]+/)
+            );
+
+        if (!names.length) {
+            return;
+        }
+
+        let fields =
+            getSection8TestFields();
+
+        while (fields.length < names.length) {
+
+            addTestKit();
+
+            fields =
+                getSection8TestFields();
+
+        }
+
+        names.forEach(function (name, index) {
+
+            const field =
+                fields[index];
+
+            if (!field) {
+                return;
+            }
+
+            field.value = name;
+
+        });
+
+        updateTestKitNumbers();
+
+    }
+
+
+    function syncAllFromA3() {
+
+        syncA3ToSection8();
+        saveLocalDraft();
+
+    }
+
+
+    function initialisePocTestSync() {
+
+        if (!pocTestsField) {
+            return;
+        }
+
+        /*
+         * A3 is editable and is the master list for Section 8.
+         */
+        pocTestsField.readOnly = false;
+        pocTestsField.removeAttribute("aria-readonly");
+
+        pocTestsField.addEventListener(
+            "input",
+            function () {
+                syncAllFromA3();
+            }
+        );
+
+        /*
+         * Do NOT touch A4 here.
+         * A4 remains an independent statistics formset.
+         */
+        syncA3ToSection8();
+
+    }
+
+
     function addPocRow() {
 
         if (
@@ -3065,49 +3458,37 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-
         const index =
             parseInt(
                 pocTotalForms.value,
                 10
             );
 
-
-        let html =
+        const html =
             pocTemplate.innerHTML
                 .replace(
                     /__prefix__/g,
                     index
                 );
 
-
         const wrapper =
-            document.createElement(
-                "tbody"
-            );
-
+            document.createElement("tbody");
 
         wrapper.innerHTML =
             "<table><tbody>" +
             html +
             "</tbody></table>";
 
-
         const row =
-            wrapper.querySelector(
-                ".poc-row"
-            );
-
+            wrapper.querySelector(".poc-row");
 
         if (!row) {
             return;
         }
 
-
         pocContainer.appendChild(
             row.cloneNode(true)
         );
-
 
         pocTotalForms.value =
             index + 1;
@@ -3122,7 +3503,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
         addPocButton.addEventListener(
             "click",
-            addPocRow
+            function () {
+
+                addPocRow();
+
+            }
         );
 
     }
@@ -3139,50 +3524,40 @@ document.addEventListener("DOMContentLoaded", function () {
                         ".remove-poc-row"
                     );
 
-
                 if (!button) {
                     return;
                 }
 
-
                 const row =
-                    button.closest(
-                        ".poc-row"
-                    );
-
+                    button.closest(".poc-row");
 
                 if (!row) {
                     return;
                 }
-
 
                 const rows =
                     pocContainer.querySelectorAll(
                         ".poc-row"
                     );
 
-
                 if (rows.length === 1) {
 
                     row.querySelectorAll(
-                        "input"
-                    ).forEach(
-                        function (input) {
+                        "input, select, textarea"
+                    ).forEach(function (input) {
+                        input.value = "";
+                    });
 
-                            input.value = "";
-
-                        }
-                    );
-
+                    setA3TestNames([]);
 
                     return;
 
                 }
 
-
                 row.remove();
 
                 renumberPocRows();
+
 
                 saveLocalDraft();
 
@@ -3199,52 +3574,43 @@ document.addEventListener("DOMContentLoaded", function () {
                 ".poc-row"
             );
 
+        rows.forEach(function (row, index) {
 
-        rows.forEach(
-            function (row, index) {
+            row.querySelectorAll(
+                "input, select, textarea"
+            ).forEach(function (input) {
 
-                row.querySelectorAll(
-                    "input, select"
-                ).forEach(
-                    function (input) {
+                if (input.name) {
 
-                        if (input.name) {
+                    input.name =
+                        input.name.replace(
+                            /stats-\d+-/,
+                            "stats-" +
+                            index +
+                            "-"
+                        );
 
-                            input.name =
-                                input.name.replace(
-                                    /stats-\d+-/,
-                                    "stats-" +
-                                    index +
-                                    "-"
-                                );
+                }
 
-                        }
+                if (input.id) {
 
+                    input.id =
+                        input.id.replace(
+                            /stats-\d+-/,
+                            "stats-" +
+                            index +
+                            "-"
+                        );
 
-                        if (input.id) {
+                }
 
-                            input.id =
-                                input.id.replace(
-                                    /stats-\d+-/,
-                                    "stats-" +
-                                    index +
-                                    "-"
-                                );
+            });
 
-                        }
-
-                    }
-                );
-
-            }
-        );
-
+        });
 
         if (pocTotalForms) {
-
             pocTotalForms.value =
                 rows.length;
-
         }
 
     }
@@ -3285,15 +3651,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-
         const index =
             parseInt(
                 testkitTotalForms.value,
                 10
             );
 
-
-        let html =
+        const html =
             testkitTemplate.innerHTML
                 .replace(
                     /__prefix__/g,
@@ -3304,34 +3668,25 @@ document.addEventListener("DOMContentLoaded", function () {
                     index + 1
                 );
 
-
         const wrapper =
-            document.createElement(
-                "div"
-            );
-
+            document.createElement("div");
 
         wrapper.innerHTML =
             html;
 
-
         const card =
             wrapper.firstElementChild;
-
 
         if (!card) {
             return;
         }
 
-
         testkitContainer.appendChild(
             card
         );
 
-
         testkitTotalForms.value =
             index + 1;
-
 
         updateTestKitNumbers();
 
@@ -3346,48 +3701,37 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-
         const cards =
             testkitContainer.querySelectorAll(
                 ".test-kit-card"
             );
 
+        cards.forEach(function (card, index) {
 
-        cards.forEach(
-            function (card, index) {
+            const heading =
+                card.querySelector(
+                    ".test-kit-card-header h4"
+                );
 
-                const heading =
-                    card.querySelector(
-                        ".test-kit-card-header h4"
-                    );
-
-
-                if (heading) {
-
-                    heading.textContent =
-                        "Test Kit " +
-                        (index + 1);
-
-                }
-
-
-                const remove =
-                    card.querySelector(
-                        ".remove-test-kit-button"
-                    );
-
-
-                if (remove) {
-
-                    remove.style.display =
-                        index === 0
-                            ? "none"
-                            : "inline-block";
-
-                }
-
+            if (heading) {
+                heading.textContent =
+                    "Test Kit " +
+                    (index + 1);
             }
-        );
+
+            const remove =
+                card.querySelector(
+                    ".remove-test-kit-button"
+                );
+
+            if (remove) {
+                remove.style.display =
+                    index === 0
+                        ? "none"
+                        : "inline-block";
+            }
+
+        });
 
     }
 
@@ -3396,7 +3740,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
         addTestkitButton.addEventListener(
             "click",
-            addTestKit
+            function () {
+
+                addTestKit();
+
+                /*
+                 * If a new empty Section 8 card is manually added,
+                 * keep it available for the next A3 test.
+                 */
+                const a3Names =
+                    getA3TestNames();
+
+                const section8Names =
+                    uniqueNonEmpty(
+                        getSection8TestFields().map(function (field) {
+                            return field.value;
+                        })
+                    );
+
+                if (
+                    section8Names.length > a3Names.length
+                ) {
+                    setA3TestNames(section8Names);
+                    }
+
+            }
         );
 
     }
@@ -3413,61 +3781,60 @@ document.addEventListener("DOMContentLoaded", function () {
                         ".remove-test-kit-button"
                     );
 
-
                 if (!button) {
                     return;
                 }
-
 
                 const card =
                     button.closest(
                         ".test-kit-card"
                     );
 
-
                 if (!card) {
                     return;
                 }
-
 
                 const cards =
                     testkitContainer.querySelectorAll(
                         ".test-kit-card"
                     );
 
-
                 if (cards.length === 1) {
 
                     card.querySelectorAll(
-                        "input"
-                    ).forEach(
-                        function (input) {
-
-                            input.value = "";
-
-                        }
-                    );
-
+                        "input[type='text'], input[type='number'], input[type='search'], select, textarea"
+                    ).forEach(function (input) {
+                        input.value = "";
+                    });
 
                     card.querySelectorAll(
                         "input[type='radio']"
-                    ).forEach(
-                        function (radio) {
+                    ).forEach(function (radio) {
+                        radio.checked = false;
+                    });
 
-                            radio.checked = false;
-
-                        }
-                    );
-
+                    setA3TestNames([]);
 
                     return;
 
                 }
 
-
                 card.remove();
 
                 renumberTestKitFields();
+
+                /*
+                 * Rebuild the master list from the remaining Section 8
+                 * test names so A3 and A4 remain synchronized.
+                 */
+                const names =
+                    uniqueNonEmpty(
+                        getSection8TestFields().map(function (field) {
+                            return field.value;
+                        })
+                    );
+
+                setA3TestNames(names);
 
                 saveLocalDraft();
 
@@ -3483,77 +3850,59 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-
         const cards =
             testkitContainer.querySelectorAll(
                 ".test-kit-card"
             );
 
+        cards.forEach(function (card, newIndex) {
 
-        cards.forEach(
-            function (card, newIndex) {
+            card.querySelectorAll(
+                "input, select, textarea"
+            ).forEach(function (input) {
 
-                card.querySelectorAll(
-                    "input, select, textarea"
-                ).forEach(
-                    function (input) {
+                if (input.name) {
 
-                        if (input.name) {
+                    input.name =
+                        input.name.replace(
+                            /testkit-\d+-/,
+                            "testkit-" +
+                            newIndex +
+                            "-"
+                        );
 
-                            input.name =
-                                input.name.replace(
-                                    /testkit-\d+-/,
-                                    "testkit-" +
-                                    newIndex +
-                                    "-"
-                                );
+                }
 
-                        }
+                if (input.id) {
 
+                    input.id =
+                        input.id.replace(
+                            /testkit-\d+-/,
+                            "testkit-" +
+                            newIndex +
+                            "-"
+                        );
 
-                        if (input.id) {
+                }
 
-                            input.id =
-                                input.id.replace(
-                                    /testkit-\d+-/,
-                                    "testkit-" +
-                                    newIndex +
-                                    "-"
-                                );
+            });
 
-                        }
-
-
-                        if (
-                            input.type === "radio" &&
-                            input.name
-                        ) {
-
-                            /*
-                             * Radio groups remain correctly grouped
-                             * because the name has been updated.
-                             */
-
-                        }
-
-                    }
-                );
-
-            }
-        );
-
+        });
 
         if (testkitTotalForms) {
-
             testkitTotalForms.value =
                 cards.length;
-
         }
 
     }
 
 
-    /* =====================================================
+    /*
+     * Initialise after all formset elements exist.
+     */
+    initialisePocTestSync();
+
+/* =====================================================
        NON-CONFORMITY FORMSET
     ====================================================== */
     const ncContainer=document.getElementById("nc-forms");
