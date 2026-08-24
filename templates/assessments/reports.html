@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_heading %}Reports{% endblock %}
+{% block content %}
+<div class="assessment-header"><div><span class="assessment-eyebrow">REPORTING</span><h2>Assessment Reports</h2><p>Summary of assessment performance with direct access to presentation-ready reports.</p></div></div>
+<div class="assessment-card">{% if report_rows %}<div class="responsive-table"><table class="assessment-table"><thead><tr><th>Facility</th><th>MFL Code</th><th>Date</th><th>Status</th><th>Facility Score</th><th>Level</th><th>Actions</th></tr></thead><tbody>{% for row in report_rows %}<tr><td>{{ row.assessment.facility_name|default:"Unnamed" }}</td><td>{{ row.assessment.facility_mfl_code|default:"—" }}</td><td>{{ row.assessment.date_of_assessment|default:"—" }}</td><td>{% if row.assessment.status == 'completed' %}<span class="status-badge completed">Completed</span>{% else %}<span class="status-badge draft">Draft</span>{% endif %}</td><td>{{ row.result.facility_score }}%</td><td>{{ row.result.level|default:"—" }}</td><td><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="table-link" href="{% url 'assessment_detail' row.assessment.pk %}">View</a><a class="table-link" href="{% url 'assessment_report' row.assessment.pk %}">Report</a></div></td></tr>{% endfor %}</tbody></table></div>{% else %}<div class="empty-state"><h3>No reports available</h3><p>Reports will appear here after assessments have been created.</p></div>{% endif %}</div>
+{% endblock %}

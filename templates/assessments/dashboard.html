@@ -1,0 +1,329 @@
+
+{% extends "base.html" %}
+
+{% block title %}
+    Dashboard
+{% endblock %}
+
+{% block page_heading %}
+    Dashboard
+{% endblock %}
+
+
+{% block content %}
+
+
+<div class="dashboard-header">
+
+    <div>
+
+        <span class="assessment-eyebrow">
+            OVERVIEW
+        </span>
+
+        <h2>
+            Welcome, {{ request.user.username }} 👋
+        </h2>
+
+        {% if request.user.is_staff or request.user.is_superuser %}
+
+            <p>
+                You are viewing assessments from all users.
+            </p>
+
+        {% else %}
+
+            <p>
+                Here is an overview of your assessments.
+            </p>
+
+        {% endif %}
+
+    </div>
+
+
+    <a
+        href="{% url 'assessment_create' %}"
+        class="button button-primary"
+    >
+        ➕ New Assessment
+    </a>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- STATISTICS -->
+<!-- ================================================= -->
+
+<div class="dashboard-cards">
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            📋
+        </div>
+
+        <div>
+
+            <p>
+                Total Assessments
+            </p>
+
+            <h2>
+                {{ total_assessments }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            📝
+        </div>
+
+        <div>
+
+            <p>
+                Draft Assessments
+            </p>
+
+            <h2>
+                {{ draft_assessments }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            ✅
+        </div>
+
+        <div>
+
+            <p>
+                Completed Assessments
+            </p>
+
+            <h2>
+                {{ completed_assessments }}
+            </h2>
+
+        </div>
+
+    </div>
+
+
+    <div class="stat-card">
+
+        <div class="stat-icon">
+            📊
+        </div>
+
+        <div>
+
+            <p>
+                Average Score
+            </p>
+
+            <h2>
+                {{ average_score }}%
+            </h2>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- RECENT ASSESSMENTS -->
+<!-- ================================================= -->
+
+<div class="assessment-card recent-card">
+
+
+    <div class="card-header">
+
+        <div>
+
+            <h3>
+                Recent Assessments
+            </h3>
+
+            <p>
+                Your most recently created assessments.
+            </p>
+
+        </div>
+
+
+        <a
+            href="{% url 'my_assessments' %}"
+            class="button button-secondary"
+        >
+            View All
+        </a>
+
+    </div>
+
+
+    {% if recent_assessments %}
+
+
+        <div class="responsive-table">
+
+            <table class="assessment-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Facility
+                        </th>
+
+                        <th>
+                            Assessment Type
+                        </th>
+
+                        <th>
+                            Date
+                        </th>
+
+                        <th>
+                            County
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Score
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for assessment in recent_assessments %}
+
+                        <tr>
+
+                            <td>
+                                {{ assessment.facility_name }}
+                            </td>
+
+                            <td>
+                                {{ assessment.assessment_type }}
+                            </td>
+
+                            <td>
+                                {{ assessment.date_of_assessment }}
+                            </td>
+
+                            <td>
+                                {{ assessment.county_name }}
+                            </td>
+
+                            <td>
+
+                                {% if assessment.status == "completed" %}
+
+                                    <span class="status-badge completed">
+                                        Completed
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="status-badge draft">
+                                        Draft
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'assessment_detail' assessment.pk %}"
+                                    class="table-link"
+                                >
+                                    View Score
+                                </a>
+
+                            </td>
+
+                            <td>
+
+                                <a
+                                    href="{% url 'assessment_detail' assessment.pk %}"
+                                    class="table-link"
+                                >
+                                    Open
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    {% else %}
+
+
+        <div class="empty-state">
+
+            <h3>
+                No assessments yet
+            </h3>
+
+            <p>
+                Create your first laboratory assessment
+                to begin.
+            </p>
+
+            <a
+                href="{% url 'assessment_create' %}"
+                class="button button-primary"
+            >
+                Create First Assessment
+            </a>
+
+        </div>
+
+
+    {% endif %}
+
+
+</div>
+
+
+{% endblock %}
+

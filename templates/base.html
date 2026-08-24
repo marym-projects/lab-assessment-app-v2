@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        {% block title %}
+            Laboratory Assessment Management System
+        {% endblock %}
+    </title>
+
+    {% load static %}
+
+    <link
+        rel="stylesheet"
+        href="{% static 'css/style.css' %}"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- ================================================= -->
+    <!-- SIDEBAR -->
+    <!-- ================================================= -->
+
+    <aside class="sidebar">
+
+        <div class="sidebar-brand">
+
+            <h2>
+                Laboratory Assessment
+            </h2>
+
+            <small>
+                Management System
+            </small>
+
+        </div>
+
+
+        <nav class="sidebar-menu">
+
+            <a
+                href="{% url 'dashboard' %}"
+                class="sidebar-link"
+            >
+                🏠 Dashboard
+            </a>
+
+
+            <a
+                href="{% url 'assessment_create' %}"
+                class="sidebar-link"
+            >
+                ➕ New Assessment
+            </a>
+
+
+            <a
+                href="{% url 'my_assessments' %}"
+                class="sidebar-link"
+            >
+                📋 My Assessments
+            </a>
+
+
+            <a
+                href="{% url 'reports' %}"
+                class="sidebar-link"
+            >
+                📊 Reports
+            </a>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-user">
+
+                <strong>
+                    {{ request.user.username }}
+                </strong>
+
+                {% if request.user.is_staff or request.user.is_superuser %}
+
+                    <small>
+                        Administrator
+                    </small>
+
+                {% else %}
+
+                    <small>
+                        User
+                    </small>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- Logout must be POST -->
+
+            <form
+                method="post"
+                action="{% url 'logout' %}"
+                class="logout-form"
+            >
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    class="sidebar-link logout-button"
+                >
+                    🚪 Logout
+                </button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================================================= -->
+    <!-- MAIN CONTENT -->
+    <!-- ================================================= -->
+
+    <main class="main-content">
+
+
+        <header class="topbar">
+
+            <div>
+
+                <h1>
+                    {% block page_heading %}
+                        Laboratory Assessment System
+                    {% endblock %}
+                </h1>
+
+            </div>
+
+
+            <div class="user-info">
+
+                {{ request.user.username }}
+
+                {% if request.user.is_staff or request.user.is_superuser %}
+                    <span class="role-badge admin">
+                        Admin
+                    </span>
+                {% else %}
+                    <span class="role-badge">
+                        User
+                    </span>
+                {% endif %}
+
+            </div>
+
+        </header>
+
+
+        <div class="page-content">
+
+
+            {% if messages %}
+
+                {% for message in messages %}
+
+                    <div class="alert alert-{{ message.tags }}">
+
+                        {{ message }}
+
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+
+            {% block content %}
+
+            {% endblock %}
+
+
+        </div>
+
+    </main>
+
+
+</body>
+
+</html>
+

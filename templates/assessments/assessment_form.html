@@ -1,0 +1,4377 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {% if edit_mode %}
+        Edit Laboratory Assessment
+    {% else %}
+        New Laboratory Assessment
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+<style>
+/* =========================================================
+   ASSESSMENT WIZARD
+========================================================= */
+
+.assessment-wizard {
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.assessment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.assessment-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #0b5ed7;
+}
+
+.assessment-header h1 {
+    margin: 5px 0;
+}
+
+.assessment-header p {
+    margin: 0;
+    color: #68717b;
+}
+
+.back-link {
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   WIZARD PROGRESS
+========================================================= */
+
+.wizard-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 30px;
+    padding: 18px;
+    background: white;
+    border: 1px solid #e0e5e9;
+    border-radius: 10px;
+    overflow-x: auto;
+}
+
+.wizard-step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #68717b;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.wizard-step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #495057;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.wizard-step-indicator.active {
+    color: #0b5ed7;
+}
+
+.wizard-step-indicator.active .wizard-step-number {
+    background: #0b5ed7;
+    color: white;
+}
+
+.wizard-step-indicator.completed .wizard-step-number {
+    background: #198754;
+    color: white;
+}
+
+.wizard-line {
+    width: 45px;
+    height: 2px;
+    background: #dfe4e8;
+    flex-shrink: 0;
+}
+
+
+/* =========================================================
+   WIZARD PAGES
+========================================================= */
+
+.wizard-page {
+    display: none;
+}
+
+.wizard-page.active {
+    display: block;
+}
+
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.assessment-card {
+    background: white;
+    border: 1px solid #e0e5e9;
+    border-radius: 10px;
+    padding: 25px;
+    margin-bottom: 25px;
+}
+
+.part-heading {
+    margin-bottom: 20px;
+}
+
+.part-heading span {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0b5ed7;
+    letter-spacing: 1px;
+}
+
+.part-heading h2 {
+    margin: 5px 0 0;
+}
+
+
+/* =========================================================
+   SECTION HEADERS
+========================================================= */
+
+.section-title,
+.checklist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+}
+
+.section-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #eaf2ff;
+    color: #0b5ed7;
+    font-weight: 800;
+}
+
+.section-title h3,
+.checklist-header h3 {
+    margin: 0;
+}
+
+.section-title p {
+    margin: 5px 0 0;
+    color: #68717b;
+}
+
+.section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0b5ed7;
+}
+
+
+/* =========================================================
+   FORM GRID
+========================================================= */
+
+.facility-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-group.field-wide {
+    grid-column: 1 / -1;
+}
+
+.field-group label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.field-group input,
+.field-group select,
+.field-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.field-help {
+    color: #68717b;
+    font-size: 12px;
+}
+
+.field-error {
+    color: #b42318;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   MFL LOOKUP
+========================================================= */
+
+.mfl-lookup-box {
+    grid-column: 1 / -1;
+    padding: 18px;
+    background: #f5f9ff;
+    border: 1px solid #cfe0ff;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.mfl-lookup-box h4 {
+    margin: 0 0 5px;
+}
+
+.mfl-lookup-box p {
+    margin: 0 0 15px;
+    color: #68717b;
+    font-size: 13px;
+}
+
+.mfl-status {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.mfl-status.success {
+    color: #198754;
+}
+
+.mfl-status.error {
+    color: #b42318;
+}
+
+.mfl-status.loading {
+    color: #0b5ed7;
+}
+
+
+/* =========================================================
+   REPEATING ROWS
+========================================================= */
+
+.repeat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 12px;
+    border: 1px solid #e0e5e9;
+    border-radius: 8px;
+    background: #fafbfc;
+}
+
+.repeat-row-header {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.repeat-row-number {
+    font-size: 12px;
+    font-weight: 700;
+    color: #68717b;
+}
+
+.remove-row-button,
+.remove-test-kit-button {
+    border: 0;
+    background: transparent;
+    color: #b42318;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   ADD BUTTONS
+========================================================= */
+
+.add-button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    border: 1px dashed #0b5ed7;
+    background: #f5f9ff;
+    color: #0b5ed7;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.add-button:hover {
+    background: #eaf2ff;
+}
+
+
+/* =========================================================
+   TABLES
+========================================================= */
+
+.responsive-table,
+.checklist-table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.assessment-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.assessment-table th,
+.assessment-table td {
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    vertical-align: top;
+}
+
+.assessment-table th {
+    background: #f5f7f9;
+    font-size: 13px;
+}
+
+.assessment-table input,
+.assessment-table select,
+.assessment-table textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.poc-table {
+    min-width: 950px;
+}
+.nc-header-row{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin:25px 0 15px}.nc-header-row h3{margin:0}.nc-header-row p{margin:5px 0 0}.nc-table{min-width:1050px;table-layout:fixed}.nc-table th,.nc-table td{vertical-align:middle}.nc-section-col{width:10%}.nc-details-col{width:30%}.nc-correction-col{width:18%}.nc-recommendation-col{width:32%}.nc-action-col{width:10%}.nc-table textarea{min-height:78px;resize:vertical}.nc-table input,.nc-table select,.nc-table textarea{min-height:42px}
+
+
+
+/* =========================================================
+   INSTRUCTIONS
+========================================================= */
+
+.instruction-box {
+    padding: 15px 18px;
+    margin-bottom: 20px;
+    background: #f7f9fb;
+    border-left: 4px solid #0b5ed7;
+    border-radius: 5px;
+}
+
+.instruction-box h3 {
+    margin-top: 0;
+}
+
+.instruction-box p:last-child {
+    margin-bottom: 0;
+}
+
+.section-note {
+    margin-bottom: 15px;
+    padding: 12px;
+    background: #fff8e6;
+    border-left: 4px solid #f0ad4e;
+}
+
+
+/* =========================================================
+   CHECKLIST
+========================================================= */
+
+.question-column {
+    width: 50%;
+}
+
+.response-column {
+    width: 20%;
+}
+
+.comment-column {
+    width: 30%;
+}
+
+.question-cell {
+    line-height: 1.5;
+}
+
+.question-code {
+    display: inline-block;
+    margin-right: 8px;
+    color: #0b5ed7;
+}
+
+.response-cell ul { display:flex; align-items:center; justify-content:flex-start; gap:14px; flex-wrap:wrap; margin:0; padding:0; list-style:none; }
+.response-cell li { list-style:none; display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+.response-cell label { display:inline-flex; align-items:center; gap:5px; margin:0; cursor:pointer; font-size:13px; font-weight:600; }
+.response-cell input[type="radio"] { width:16px; height:16px; margin:0; flex:0 0 auto; }
+
+.response-legend {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: #68717b;
+}
+
+
+/* =========================================================
+   TEST KIT
+========================================================= */
+
+.test-kit-card {
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #dfe4e8;
+    border-radius: 10px;
+    background: #fafbfc;
+}
+
+.test-kit-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.test-kit-card-header h4 {
+    margin: 0;
+}
+
+.test-kit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+
+/* =========================================================
+   SCORING
+========================================================= */
+
+.score-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.score-box {
+    padding: 20px;
+    background: #f7f9fb;
+    border: 1px solid #e0e5e9;
+    border-radius: 8px;
+}
+
+.score-box span {
+    display: block;
+    font-size: 12px;
+    color: #68717b;
+}
+
+.score-box strong {
+    display: block;
+    margin-top: 8px;
+}
+
+
+/* =========================================================
+   NAVIGATION
+========================================================= */
+
+.wizard-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #e0e5e9;
+    border-radius: 10px;
+}
+
+.wizard-actions-right {
+    display: flex;
+    gap: 12px;
+}
+
+.wizard-status {
+    color: #68717b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.wizard-error {
+    display: none;
+    margin-bottom: 20px;
+    padding: 14px 16px;
+    background: #fff4f4;
+    border-left: 4px solid #b42318;
+    color: #842029;
+    border-radius: 6px;
+}
+
+.wizard-error.show {
+    display: block;
+}
+
+
+/* =========================================================
+   LOCAL DRAFT NOTICE
+========================================================= */
+
+.local-draft-notice {
+    display: none;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    background: #fff8e6;
+    border: 1px solid #f0d58a;
+    border-radius: 8px;
+}
+
+.local-draft-notice.show {
+    display: block;
+}
+
+.local-draft-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .facility-grid,
+    .test-kit-grid,
+    .score-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .repeat-row {
+        grid-template-columns: 1fr;
+    }
+
+    .field-group.field-wide {
+        grid-column: auto;
+    }
+
+    .wizard-progress {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .assessment-header {
+        flex-direction: column;
+    }
+
+    .wizard-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .wizard-actions-right {
+        width: 100%;
+    }
+
+    .wizard-actions-right button {
+        flex: 1;
+    }
+}
+</style>
+
+
+<div class="assessment-wizard">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="assessment-header">
+
+        <div>
+            <span class="assessment-eyebrow">
+                LABORATORY QUALITY ASSESSMENT
+            </span>
+
+            <h1>
+                {% if edit_mode %}
+                    Edit Laboratory Assessment
+                {% else %}
+                    New Laboratory Assessment
+                {% endif %}
+            </h1>
+
+            <p>
+                Enter the assessment information and complete the checklist.
+                Sections may be left unanswered where they are not applicable.
+            </p>
+        </div>
+
+        <a href="{% url 'dashboard' %}" class="back-link">
+            ← Dashboard
+        </a>
+
+    </div>
+
+
+    <!-- =====================================================
+         LOCAL DRAFT RECOVERY
+    ====================================================== -->
+
+    <div
+        id="local-draft-notice"
+        class="local-draft-notice"
+    >
+        <strong>Unfinished information found.</strong>
+
+        <div>
+            This browser has a previously saved version of this assessment.
+            Would you like to restore it?
+        </div>
+
+        <div class="local-draft-actions">
+
+            <button
+                type="button"
+                class="button button-primary"
+                id="restore-local-draft"
+            >
+                Restore
+            </button>
+
+            <button
+                type="button"
+                class="button button-secondary"
+                id="discard-local-draft"
+            >
+                Discard
+            </button>
+
+        </div>
+    </div>
+
+
+    <!-- =====================================================
+         PROGRESS
+    ====================================================== -->
+
+    <div class="wizard-progress">
+
+        <div
+            class="wizard-step-indicator active"
+            data-indicator="0"
+            role="button"
+            tabindex="0"
+        >
+            <span class="wizard-step-number">1</span>
+            Facility
+        </div>
+
+        <div class="wizard-line"></div>
+
+        <div
+            class="wizard-step-indicator"
+            data-indicator="1"
+            role="button"
+            tabindex="0"
+        >
+            <span class="wizard-step-number">2</span>
+            Checklist
+        </div>
+
+        <div class="wizard-line"></div>
+
+        <div
+            class="wizard-step-indicator"
+            data-indicator="2"
+            role="button"
+            tabindex="0"
+        >
+            <span class="wizard-step-number">3</span>
+            Scoring
+        </div>
+
+        <div class="wizard-line"></div>
+
+        <div
+            class="wizard-step-indicator"
+            data-indicator="3"
+            role="button"
+            tabindex="0"
+        >
+            <span class="wizard-step-number">4</span>
+            Recommendations
+        </div>
+
+        <div class="wizard-line"></div>
+
+        <div
+            class="wizard-step-indicator"
+            data-indicator="4"
+            role="button"
+            tabindex="0"
+        >
+            <span class="wizard-step-number">5</span>
+            Review
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FORM
+    ====================================================== -->
+
+    <form
+        method="post"
+        id="assessment-form"
+        autocomplete="off"
+    >
+
+        {% csrf_token %}
+
+
+        <!-- =================================================
+             STEP 1 — FACILITY
+        ================================================== -->
+
+        <div
+            class="wizard-page active"
+            data-step="0"
+        >
+
+            <div class="part-heading">
+
+                <span>PART A</span>
+
+                <h2>
+                    General Facility Information
+                </h2>
+
+            </div>
+
+
+            <!-- =============================================
+                 A1 FACILITY INFORMATION
+            ============================================== -->
+
+            <section class="assessment-card">
+
+                <div class="section-title">
+
+                    <span class="section-number">
+                        A1
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Facility Information
+                        </h3>
+
+                        <p>
+                            Enter the MFL code to retrieve facility
+                            information where available.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="facility-grid">
+
+
+                    <!-- MFL LOOKUP -->
+
+                    <div class="mfl-lookup-box">
+
+                        <h4>
+                            Facility lookup
+                        </h4>
+
+                        <p>
+                            Enter the facility's unique MFL code.
+                            The system will retrieve the matching facility
+                            information.
+                        </p>
+
+                        <div class="field-group">
+
+                            <label for="{{ info_form.facility_mfl_code.id_for_label }}">
+                                Facility MFL code
+                            </label>
+
+                            {{ info_form.facility_mfl_code }}
+
+                        </div>
+
+                        <div
+                            id="mfl-status"
+                            class="mfl-status"
+                        ></div>
+
+                    </div>
+
+
+                    <!-- FACILITY FIELDS -->
+
+                    {% for field in info_form %}
+
+                        {% if field.name not in a1_excluded_fields and field.name != "facility_mfl_code" %}
+
+                            <div
+                                class="
+                                    field-group
+                                    {% if field.name == 'physical_address' %}
+                                        field-wide
+                                    {% elif field.name == 'poc_tests_conducted' %}
+                                        field-wide
+                                    {% endif %}
+                                "
+                            >
+
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
+
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <small class="field-help">
+                                        {{ field.help_text }}
+                                    </small>
+                                {% endif %}
+
+                                {% if field.errors %}
+                                    <div class="field-error">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
+
+                            </div>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 A2 STAFF
+            ============================================== -->
+
+            <section class="assessment-card">
+
+                <div class="section-title">
+
+                    <span class="section-number">
+                        A2
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Staff Members
+                        </h3>
+
+                        <p>
+                            Start with one row. Add additional staff
+                            members only when required.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {{ staff_formset.management_form }}
+
+
+                <div id="staff-forms">
+
+                    {% for form in staff_formset %}
+
+                        <div
+                            class="repeat-row staff-row"
+                            data-form-index="{{ forloop.counter0 }}"
+                            
+                        >
+
+                            <div class="repeat-row-header">
+
+                                <span class="repeat-row-number">
+                                    Staff Member {{ forloop.counter }}
+                                </span>
+
+                                {% if not forloop.first %}
+                                    <button
+                                        type="button"
+                                        class="remove-row-button"
+                                    >
+                                        Remove
+                                    </button>
+                                {% endif %}
+
+                            </div>
+
+
+                            <div class="field-group">
+
+                                <label>
+                                    Name of staff
+                                </label>
+
+                                {{ form.name }}
+
+                            </div>
+
+
+                            <div class="field-group">
+
+                                <label>
+                                    Title of staff
+                                </label>
+
+                                {{ form.title }}
+
+                            </div>
+
+                        </div>
+
+                    {% endfor %}
+
+                </div>
+
+
+                <template id="empty-staff-form">
+
+                    <div class="repeat-row staff-row">
+
+                        <div class="repeat-row-header">
+
+                            <span class="repeat-row-number">
+                                Staff Member __number__
+                            </span>
+
+                            <button
+                                type="button"
+                                class="remove-row-button"
+                            >
+                                Remove
+                            </button>
+
+                        </div>
+
+
+                        <div class="field-group">
+
+                            <label>
+                                Name of staff
+                            </label>
+
+                            {{ staff_formset.empty_form.name }}
+
+                        </div>
+
+
+                        <div class="field-group">
+
+                            <label>
+                                Title of staff
+                            </label>
+
+                            {{ staff_formset.empty_form.title }}
+
+                        </div>
+
+                    </div>
+
+                </template>
+
+
+                <button
+                    type="button"
+                    class="add-button"
+                    id="add-staff-btn"
+                >
+                    + Add Staff Member
+                </button>
+
+            </section>
+
+
+            <!-- =============================================
+                 A3 INTERVIEWEE
+            ============================================== -->
+
+            <section class="assessment-card">
+
+                <div class="section-title">
+
+                    <span class="section-number">
+                        A3
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Interviewee & POC Information
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <div class="facility-grid">
+
+                    <div class="field-group">
+
+                        <label for="{{ info_form.interviewee_name.id_for_label }}">
+                            Name of interviewee
+                        </label>
+
+                        {{ info_form.interviewee_name }}
+
+                    </div>
+
+
+                    <div class="field-group">
+
+                        <label for="{{ info_form.interviewee_title.id_for_label }}">
+                            Title
+                        </label>
+
+                        {{ info_form.interviewee_title }}
+
+                    </div>
+
+
+                    <div class="field-group">
+
+                        <label for="{{ info_form.interviewee_phone.id_for_label }}">
+                            Phone number
+                        </label>
+
+                        {{ info_form.interviewee_phone }}
+
+                    </div>
+
+
+                    <div class="field-group field-wide">
+
+                        <label for="{{ info_form.poc_tests_conducted.id_for_label }}">
+                            List of POC tests conducted at this facility
+                        </label>
+
+                        {{ info_form.poc_tests_conducted }}
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- =============================================
+                 A4 POC STATISTICS
+            ============================================== -->
+
+            <section class="assessment-card">
+
+                <div class="section-title">
+
+                    <span class="section-number">
+                        A4
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            POC Tests Statistics Summary
+                        </h3>
+
+                        <p>
+                            Start with one row. Add additional rows only
+                            when more test types or periods need to be recorded.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                {{ stats_formset.management_form }}
+
+
+                <div class="responsive-table">
+
+                    <table class="assessment-table poc-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Month / Quarter / MM to MM Year
+                                </th>
+
+                                <th>
+                                    Type of Test Performed
+                                </th>
+
+                                <th>
+                                    # of tests conducted
+                                </th>
+
+                                <th>
+                                    # Positives
+                                </th>
+
+                                <th>
+                                    # Negatives
+                                </th>
+
+                                <th>
+                                    Comments
+                                </th>
+
+                                <th>
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="poc-forms">
+
+                            {% for form in stats_formset %}
+
+                                <tr
+                                    class="poc-row"
+                                    
+                                >
+
+                                    <td>
+                                        {{ form.period }}
+                                    </td>
+
+                                    <td>
+                                        {{ form.type_of_test }}
+                                    </td>
+
+                                    <td>
+                                        {{ form.tests_conducted }}
+                                    </td>
+
+                                    <td>
+                                        {{ form.positives }}
+                                    </td>
+
+                                    <td>
+                                        {{ form.negatives }}
+                                    </td>
+
+                                    <td>
+                                        {{ form.comments }}
+                                    </td>
+
+                                    <td>
+
+                                        {% if not forloop.first %}
+
+                                            <button
+                                                type="button"
+                                                class="remove-poc-row remove-row-button"
+                                            >
+                                                Remove
+                                            </button>
+
+                                        {% endif %}
+
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <template id="empty-poc-form">
+
+                    <tr class="poc-row">
+
+                        <td>
+                            {{ stats_formset.empty_form.period }}
+                        </td>
+
+                        <td>
+                            {{ stats_formset.empty_form.type_of_test }}
+                        </td>
+
+                        <td>
+                            {{ stats_formset.empty_form.tests_conducted }}
+                        </td>
+
+                        <td>
+                            {{ stats_formset.empty_form.positives }}
+                        </td>
+
+                        <td>
+                            {{ stats_formset.empty_form.negatives }}
+                        </td>
+
+                        <td>
+                            {{ stats_formset.empty_form.comments }}
+                        </td>
+
+                        <td>
+
+                            <button
+                                type="button"
+                                class="remove-poc-row remove-row-button"
+                            >
+                                Remove
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                </template>
+
+
+                <button
+                    type="button"
+                    class="add-button"
+                    id="add-poc-btn"
+                >
+                    + Add POC Test Row
+                </button>
+
+            </section>
+
+        </div>
+
+
+        <!-- =================================================
+             STEP 2 — CHECKLIST
+        ================================================== -->
+
+        <div
+            class="wizard-page"
+            data-step="1"
+        >
+
+            <div class="part-heading">
+
+                <span>PART B</span>
+
+                <h2>
+                    Assessment Checklist
+                </h2>
+
+            </div>
+
+
+            <section class="instruction-box">
+
+                <h3>
+                    Assessment instructions
+                </h3>
+
+                <ol>
+
+                    <li>
+                        YES (Y) = 2 points.
+                    </li>
+
+                    <li>
+                        PARTIAL (P) = 1 point.
+                    </li>
+
+                    <li>
+                        NO (N) = 0 points.
+                    </li>
+
+                    <li>
+                        N/A may be selected where the item does not apply.
+                    </li>
+
+                    <li>
+                        A reason/comment is required when NO or PARTIAL
+                        is selected.
+                    </li>
+
+                    <li>
+                        Individual questions do not have to be answered
+                        before moving to another section.
+                    </li>
+
+                </ol>
+
+            </section>
+
+
+            {% for section in sections %}
+
+                <section
+                    class="assessment-card checklist-section"
+                    id="checklist-section-{{ section.number }}"
+                >
+
+                    <div class="checklist-header">
+
+                        <div>
+
+                            <span class="section-label">
+                                SECTION {{ section.number }}
+                            </span>
+
+                            <h3>
+                                {{ section.name }}
+                            </h3>
+
+                        </div>
+
+
+                        <div class="response-legend">
+
+                            <span>Y = 2</span>
+                            <span>P = 1</span>
+                            <span>N = 0</span>
+                            <span>N/A</span>
+
+                        </div>
+
+                    </div>
+
+
+                    {% if section.note %}
+
+                        <div class="section-note">
+
+                            <strong>
+                                Note:
+                            </strong>
+
+                            {{ section.note }}
+
+                        </div>
+
+                    {% endif %}
+
+
+                    <div class="checklist-table-wrapper">
+
+                        <table class="assessment-table checklist-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th class="question-column">
+                                        Question
+                                    </th>
+
+                                    <th class="response-column">
+                                        Response
+                                    </th>
+
+                                    <th class="comment-column">
+                                        Comments
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for item in section.items %}
+
+                                    <tr class="checklist-row">
+
+                                        <td class="question-cell">
+
+                                            <strong class="question-code">
+                                                {{ item.code }}
+                                            </strong>
+
+                                            <span>
+                                                {{ item.text }}
+                                            </span>
+
+                                        </td>
+
+
+                                        <td class="response-cell">
+
+                                            {{ item.response_field }}
+
+                                        </td>
+
+
+                                        <td class="comment-cell">
+
+                                            {{ item.comment_field }}
+
+                                        </td>
+
+                                    </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =========================================
+                     SECTION 8
+                ========================================== -->
+
+                {% if section.number == 7 %}
+
+                    <section
+                        class="assessment-card"
+                        id="section-8"
+                    >
+
+                        <div class="checklist-header">
+
+                            <div>
+
+                                <span class="section-label">
+                                    SECTION 8
+                                </span>
+
+                                <h3>
+                                    Test Kits
+                                </h3>
+
+                                <p>
+                                    Record each test kit/pathogen or condition
+                                    assessed at the facility.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        {{ testkit_formset.management_form }}
+
+
+                        <div id="testkit-forms">
+
+                            {% for kit in testkits %}
+
+                                <div class="test-kit-card">
+
+                                    <div class="test-kit-card-header">
+
+                                        <h4>
+                                            Test Kit {{ forloop.counter }}
+                                        </h4>
+
+                                        <button
+                                            type="button"
+                                            class="remove-test-kit-button"
+                                            {% if forloop.first %}
+                                                style="display:none;"
+                                            {% endif %}
+                                        >
+                                            ✕ Remove
+                                        </button>
+
+                                    </div>
+
+
+                                    <div class="test-kit-grid">
+
+                                        <div class="field-group">
+
+                                            <label>
+                                                Name of pathogen/condition tested
+                                            </label>
+
+                                            {{ kit.form.pathogen_condition }}
+
+                                        </div>
+
+
+                                        <div class="field-group">
+
+                                            <label>
+                                                Technique of the test
+                                            </label>
+
+                                            {{ kit.form.technique }}
+
+                                            <small class="field-help">
+                                                e.g. Rapid Test, molecular,
+                                                spectrophotometry etc.
+                                            </small>
+
+                                        </div>
+
+
+                                        <div class="field-group">
+
+                                            <label>
+                                                Name of test kit
+                                            </label>
+
+                                            {{ kit.form.kit_name }}
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="checklist-table-wrapper">
+
+                                        <table class="assessment-table checklist-table">
+
+                                            <thead>
+
+                                                <tr>
+
+                                                    <th class="question-column">
+                                                        Question
+                                                    </th>
+
+                                                    <th class="response-column">
+                                                        Response
+                                                    </th>
+
+                                                    <th class="comment-column">
+                                                        Comments
+                                                    </th>
+
+                                                </tr>
+
+                                            </thead>
+
+
+                                            <tbody>
+
+                                                {% for item in kit.items %}
+
+                                                    <tr>
+
+                                                        <td class="question-cell">
+
+                                                            <strong class="question-code">
+                                                                {{ item.code }}
+                                                            </strong>
+
+                                                            {{ item.text }}
+
+                                                        </td>
+
+                                                        <td class="response-cell">
+
+                                                            {{ item.response_field }}
+
+                                                        </td>
+
+                                                        <td class="comment-cell">
+
+                                                            {{ item.comment_field }}
+
+                                                        </td>
+
+                                                    </tr>
+
+                                                {% endfor %}
+
+                                            </tbody>
+
+                                        </table>
+
+                                    </div>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+
+                        <!-- EMPTY SECTION 8 TEMPLATE -->
+
+                        <template id="empty-testkit-form">
+
+                            <div class="test-kit-card">
+
+                                <div class="test-kit-card-header">
+
+                                    <h4>
+                                        Test Kit __number__
+                                    </h4>
+
+                                    <button
+                                        type="button"
+                                        class="remove-test-kit-button"
+                                    >
+                                        ✕ Remove
+                                    </button>
+
+                                </div>
+
+
+                                <div class="test-kit-grid">
+
+                                    <div class="field-group">
+
+                                        <label>
+                                            Name of pathogen/condition tested
+                                        </label>
+
+                                        {{ empty_kit_form.pathogen_condition }}
+
+                                    </div>
+
+
+                                    <div class="field-group">
+
+                                        <label>
+                                            Technique of the test
+                                        </label>
+
+                                        {{ empty_kit_form.technique }}
+
+                                        <small class="field-help">
+                                            e.g. Rapid Test, molecular,
+                                            spectrophotometry etc.
+                                        </small>
+
+                                    </div>
+
+
+                                    <div class="field-group">
+
+                                        <label>
+                                            Name of test kit
+                                        </label>
+
+                                        {{ empty_kit_form.kit_name }}
+
+                                    </div>
+
+                                </div>
+
+
+                                <div class="checklist-table-wrapper">
+
+                                    <table class="assessment-table checklist-table">
+
+                                        <thead>
+
+                                            <tr>
+
+                                                <th class="question-column">
+                                                    Question
+                                                </th>
+
+                                                <th class="response-column">
+                                                    Response
+                                                </th>
+
+                                                <th class="comment-column">
+                                                    Comments
+                                                </th>
+
+                                            </tr>
+
+                                        </thead>
+
+
+                                        <tbody>
+
+                                            {% for item in empty_kit_items %}
+
+                                                <tr>
+
+                                                    <td class="question-cell">
+
+                                                        <strong class="question-code">
+                                                            {{ item.code }}
+                                                        </strong>
+
+                                                        {{ item.text }}
+
+                                                    </td>
+
+                                                    <td class="response-cell">
+
+                                                        {{ item.response_field }}
+
+                                                    </td>
+
+                                                    <td class="comment-cell">
+
+                                                        {{ item.comment_field }}
+
+                                                    </td>
+
+                                                </tr>
+
+                                            {% endfor %}
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            </div>
+
+                        </template>
+
+
+                        <button
+                            type="button"
+                            class="add-button"
+                            id="add-testkit-btn"
+                        >
+                            + Add Test Kit
+                        </button>
+
+                    </section>
+
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+
+        <!-- =================================================
+             STEP 3 — SCORING
+        ================================================== -->
+
+        <div
+            class="wizard-page"
+            data-step="2"
+        >
+
+            <div class="part-heading">
+
+                <span>PART C</span>
+
+                <h2>
+                    Scoring
+                </h2>
+
+            </div>
+
+
+            <section class="assessment-card">
+
+                <div class="instruction-box">
+
+                    <h3>
+                        Scoring Instructions
+                    </h3>
+
+                    <p>
+                        The final score is calculated after the assessment
+                        has been saved.
+                    </p>
+
+                    <ul>
+
+                        <li>
+                            YES / Y = 2 points
+                        </li>
+
+                        <li>
+                            PARTIAL / P = 1 point
+                        </li>
+
+                        <li>
+                            NO / N = 0 points
+                        </li>
+
+                        <li>
+                            N/A is excluded where applicable.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <div class="score-summary">
+
+                    <div class="score-box">
+
+                        <span>
+                            Possible Total Score
+                        </span>
+
+                        <strong>
+                            Calculated after assessment
+                        </strong>
+
+                    </div>
+
+
+                    <div class="score-box">
+
+                        <span>
+                            Total Facility Score
+                        </span>
+
+                        <strong>
+                            Calculated after assessment
+                        </strong>
+
+                    </div>
+
+
+                    <div class="score-box">
+
+                        <span>
+                            Total Facility Percentage Score
+                        </span>
+
+                        <strong>
+                            Calculated after assessment
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- =================================================
+             STEP 4 — RECOMMENDATIONS
+        ================================================== -->
+
+        <div
+            class="wizard-page"
+            data-step="3"
+        >
+
+            <div class="part-heading">
+
+                <span>PART D</span>
+
+                <h2>
+                    Non-Conformity Report & Recommendations
+                </h2>
+
+            </div>
+
+
+            <section class="assessment-card">
+
+                <div class="facility-grid">
+
+                    <div class="field-group">
+
+                        <label>
+                            Site Supervisor
+                        </label>
+
+                        {{ info_form.site_supervisor_name }}
+
+                    </div>
+
+
+                    <div class="field-group">
+
+                        <label>
+                            Site Supervisor Date
+                        </label>
+
+                        {{ info_form.site_supervisor_date }}
+
+                    </div>
+
+
+                    <div class="field-group">
+
+                        <label>
+                            Assessor(s)
+                        </label>
+
+                        {{ info_form.assessors }}
+
+                    </div>
+
+
+                    <div class="field-group">
+
+                        <label>
+                            Assessor Date
+                        </label>
+
+                        {{ info_form.assessor_date }}
+
+                    </div>
+
+                </div>
+
+
+                <div class="nc-header-row">
+                    <div><h3>Non-Conformities and Recommendations</h3><p class="field-help">Start with one row. Add another only when needed.</p></div>
+                    <button type="button" class="add-button" id="add-nc-btn">+ Add Non-Conformity</button>
+                </div>
+                {{ nc_formset.management_form }}
+                <div class="responsive-table">
+                    <table class="assessment-table nc-table">
+                        <thead><tr><th class="nc-section-col">Section No.</th><th class="nc-details-col">Details of non-conformity</th><th class="nc-correction-col">Correction type</th><th class="nc-recommendation-col">Recommendations</th><th class="nc-action-col">Action</th></tr></thead>
+                        <tbody id="nc-forms">
+                            {% for form in nc_formset %}
+                                <tr class="nc-row"><td>{{ form.section_number }}</td><td>{{ form.details }}</td><td>{{ form.correction_type }}</td><td>{{ form.recommendations }}</td><td>{% if not forloop.first %}<button type="button" class="remove-nc-row remove-row-button">Remove</button>{% endif %}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <template id="empty-nc-form"><tr class="nc-row"><td>{{ nc_formset.empty_form.section_number }}</td><td>{{ nc_formset.empty_form.details }}</td><td>{{ nc_formset.empty_form.correction_type }}</td><td>{{ nc_formset.empty_form.recommendations }}</td><td><button type="button" class="remove-nc-row remove-row-button">Remove</button></td></tr></template>
+            </section>
+
+        </div>
+
+
+        <!-- =================================================
+             STEP 5 — REVIEW
+        ================================================== -->
+
+        <div
+            class="wizard-page"
+            data-step="4"
+        >
+
+            <div class="part-heading">
+
+                <span>FINAL STEP</span>
+
+                <h2>
+                    Review & Save Assessment
+                </h2>
+
+            </div>
+
+
+            <section class="assessment-card">
+
+                <div class="section-title">
+
+                    <span class="section-number">
+                        ✓
+                    </span>
+
+                    <div>
+
+                        <h3>
+                            Assessment Ready for Submission
+                        </h3>
+
+                        <p>
+                            Review your information before saving.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="instruction-box">
+
+                    <h3>
+                        Before saving
+                    </h3>
+
+                    <ul>
+
+                        <li>
+                            Check the facility information.
+                        </li>
+
+                        <li>
+                            Check the staff and POC statistics.
+                        </li>
+
+                        <li>
+                            Review checklist responses.
+                        </li>
+
+                        <li>
+                            Review Section 8 test kits.
+                        </li>
+
+                        <li>
+                            Review non-conformities and recommendations.
+                        </li>
+
+                    </ul>
+
+                </div>
+
+
+                <div class="information-note">
+
+                    <strong>
+                        Ready to save?
+                    </strong>
+
+                    <p>
+                        Click the button below to save this assessment.
+                    </p>
+
+                </div>
+
+            </section>
+
+        </div>
+
+
+        <!-- =================================================
+             ERROR
+        ================================================== -->
+
+        <div
+            id="wizard-error"
+            class="wizard-error"
+        >
+            Please check the highlighted fields before saving.
+        </div>
+
+
+        <!-- =================================================
+             NAVIGATION
+        ================================================== -->
+
+        <div class="wizard-actions">
+
+            <div>
+
+                <span
+                    id="wizard-status"
+                    class="wizard-status"
+                >
+                    Step 1 of 5
+                </span>
+
+            </div>
+
+
+            <div class="wizard-actions-right">
+
+                <button
+                    type="button"
+                    id="prev-step"
+                    class="button button-secondary"
+                    style="display:none;"
+                >
+                    ← Back
+                </button>
+
+
+                <button
+                    type="button"
+                    id="next-step"
+                    class="button button-primary"
+                >
+                    Next →
+                </button>
+
+
+                <button
+                    type="submit"
+                    id="submit-assessment"
+                    class="button button-primary"
+                    style="display:none;"
+                >
+                    Save Assessment
+                </button>
+
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    "use strict";
+
+
+    /* =====================================================
+       BASIC ELEMENTS
+    ====================================================== */
+
+    const form = document.getElementById("assessment-form");
+
+    const pages = Array.from(
+        document.querySelectorAll(".wizard-page")
+    );
+
+    const indicators = Array.from(
+        document.querySelectorAll(".wizard-step-indicator")
+    );
+
+    const nextButton = document.getElementById("next-step");
+
+    const previousButton = document.getElementById("prev-step");
+
+    const submitButton = document.getElementById(
+        "submit-assessment"
+    );
+
+    const statusText = document.getElementById(
+        "wizard-status"
+    );
+
+    const errorBox = document.getElementById(
+        "wizard-error"
+    );
+
+
+    let currentStep = 0;
+
+
+    /* =====================================================
+       WIZARD NAVIGATION
+
+       IMPORTANT:
+       We deliberately DO NOT validate the entire section
+       before allowing the user to continue.
+
+       This solves the problem where unanswered optional
+       questions were preventing movement to the next section.
+    ====================================================== */
+
+    function showStep(step) {
+
+        if (step < 0) {
+            step = 0;
+        }
+
+        if (step >= pages.length) {
+            step = pages.length - 1;
+        }
+
+        currentStep = step;
+
+
+        pages.forEach(function (page, index) {
+
+            page.classList.toggle(
+                "active",
+                index === currentStep
+            );
+
+        });
+
+
+        indicators.forEach(function (indicator, index) {
+
+            indicator.classList.toggle(
+                "active",
+                index === currentStep
+            );
+
+            indicator.classList.toggle(
+                "completed",
+                index < currentStep
+            );
+
+        });
+
+
+        previousButton.style.display =
+            currentStep === 0
+                ? "none"
+                : "inline-block";
+
+
+        nextButton.style.display =
+            currentStep === pages.length - 1
+                ? "none"
+                : "inline-block";
+
+
+        submitButton.style.display =
+            currentStep === pages.length - 1
+                ? "inline-block"
+                : "none";
+
+
+        statusText.textContent =
+            "Step " +
+            (currentStep + 1) +
+            " of " +
+            pages.length;
+
+
+        errorBox.classList.remove("show");
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+
+        saveLocalDraft();
+    }
+
+
+    nextButton.addEventListener(
+        "click",
+        function () {
+
+            /*
+             * No "all fields required" validation here.
+             *
+             * Users can move forward even when some questions
+             * are blank.
+             */
+
+            if (currentStep < pages.length - 1) {
+
+                showStep(currentStep + 1);
+
+            }
+
+        }
+    );
+
+
+    previousButton.addEventListener(
+        "click",
+        function () {
+
+            if (currentStep > 0) {
+
+                showStep(currentStep - 1);
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       CLICKABLE STEP INDICATORS
+    ====================================================== */
+
+    indicators.forEach(function (indicator) {
+
+        indicator.addEventListener(
+            "click",
+            function () {
+
+                const targetStep = parseInt(
+                    indicator.dataset.indicator,
+                    10
+                );
+
+                showStep(targetStep);
+
+            }
+        );
+
+
+        indicator.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                ) {
+
+                    event.preventDefault();
+
+                    const targetStep = parseInt(
+                        indicator.dataset.indicator,
+                        10
+                    );
+
+                    showStep(targetStep);
+
+                }
+
+            }
+        );
+
+    });
+
+
+    /* =====================================================
+       DATE OF ASSESSMENT
+       
+       Automatically use today's date.
+       Future dates are not allowed.
+    ====================================================== */
+
+    const assessmentDate = document.getElementById(
+        "id_date_of_assessment"
+    );
+
+
+    function getTodayLocalDate() {
+
+        const now = new Date();
+
+        const year = now.getFullYear();
+
+        const month = String(
+            now.getMonth() + 1
+        ).padStart(2, "0");
+
+        const day = String(
+            now.getDate()
+        ).padStart(2, "0");
+
+        return (
+            year +
+            "-" +
+            month +
+            "-" +
+            day
+        );
+
+    }
+
+
+    if (assessmentDate) {
+
+        const today = getTodayLocalDate();
+
+        assessmentDate.max = today;
+
+        /*
+         * For a new assessment, automatically set today.
+         *
+         * For an existing assessment, do not overwrite the
+         * stored date.
+         */
+
+        {% if not edit_mode %}
+
+        if (!assessmentDate.value) {
+
+            assessmentDate.value = today;
+
+        }
+
+        {% endif %}
+
+    }
+
+
+    /* =====================================================
+       PREVENT FUTURE ASSESSMENT DATE
+    ====================================================== */
+
+    if (assessmentDate) {
+
+        assessmentDate.addEventListener(
+            "change",
+            function () {
+
+                const today = getTodayLocalDate();
+
+                if (
+                    assessmentDate.value &&
+                    assessmentDate.value > today
+                ) {
+
+                    assessmentDate.value = today;
+
+                    alert(
+                        "The assessment date cannot be in the future. Today's date has been used."
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       MFL FACILITY LOOKUP
+       
+       Endpoint expected:
+       
+       /facility-lookup/?mfl_code=12345
+
+       Expected JSON:
+
+       {
+           "found": true,
+           "facility": {
+               "facility_name": "...",
+               "county_name": "...",
+               "sub_county": "...",
+               "facility_type": "...",
+               "level": "...",
+               "affiliation": "...",
+               "physical_address": "..."
+           }
+       }
+    ====================================================== */
+
+    const mflField = document.getElementById(
+        "id_facility_mfl_code"
+    );
+
+    const mflStatus = document.getElementById(
+        "mfl-status"
+    );
+
+
+    const mflMappings = {
+
+        facility_name:
+            "id_facility_name",
+
+        county_name:
+            "id_county_name",
+
+        sub_county:
+            "id_sub_county",
+
+        facility_type:
+            "id_facility_type",
+
+        level:
+            "id_level",
+
+        affiliation:
+            "id_affiliation",
+
+        physical_address:
+            "id_physical_address"
+
+    };
+
+
+    function setMflStatus(
+        message,
+        type
+    ) {
+
+        if (!mflStatus) {
+            return;
+        }
+
+        mflStatus.textContent = message;
+
+        mflStatus.className =
+            "mfl-status " +
+            (type || "");
+
+    }
+
+
+    function fillField(
+        elementId,
+        value
+    ) {
+
+        const element =
+            document.getElementById(elementId);
+
+        if (!element || value === undefined) {
+            return;
+        }
+
+
+        if (
+            element.tagName === "SELECT"
+        ) {
+
+            const optionExists =
+                Array.from(
+                    element.options
+                ).some(function (option) {
+
+                    return option.value === String(value);
+
+                });
+
+
+            if (optionExists) {
+
+                element.value = String(value);
+
+            }
+
+        } else {
+
+            element.value = value;
+
+        }
+
+
+        /*
+         * Trigger change so any other JavaScript listening
+         * to the field can react.
+         */
+
+        element.dispatchEvent(
+            new Event(
+                "change",
+                {
+                    bubbles: true
+                }
+            )
+        );
+
+    }
+
+
+    let mflLookupTimer = null;
+
+
+    async function lookupFacility() {
+
+        if (!mflField) {
+            return;
+        }
+
+
+        const code =
+            mflField.value.trim();
+
+
+        if (!code) {
+
+            setMflStatus(
+                "",
+                ""
+            );
+
+            return;
+
+        }
+
+
+        setMflStatus(
+            "Looking up facility...",
+            "loading"
+        );
+
+
+        try {
+
+            const url =
+                "/facility-lookup/?mfl_code=" +
+                encodeURIComponent(code);
+
+
+            const response =
+                await fetch(url, {
+                    method: "GET",
+                    headers: {
+                        "Accept":
+                            "application/json"
+                    }
+                });
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Facility lookup endpoint returned " +
+                    response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !data.found ||
+                !data.facility
+            ) {
+
+                setMflStatus(
+                    "No facility was found for this MFL code. Please check the code.",
+                    "error"
+                );
+
+                return;
+
+            }
+
+
+            const facility =
+                data.facility;
+
+
+            Object.keys(mflMappings)
+                .forEach(function (key) {
+
+                    if (
+                        facility[key] !== undefined &&
+                        facility[key] !== null
+                    ) {
+
+                        fillField(
+                            mflMappings[key],
+                            facility[key]
+                        );
+
+                    }
+
+                });
+
+
+            setMflStatus(
+                "Facility information found and filled in.",
+                "success"
+            );
+
+
+            saveLocalDraft();
+
+        } catch (error) {
+
+            console.error(
+                "MFL lookup error:",
+                error
+            );
+
+
+            setMflStatus(
+                "MFL lookup is not available yet. You can enter the facility information manually.",
+                "error"
+            );
+
+        }
+
+    }
+
+
+    if (mflField) {
+
+        mflField.addEventListener(
+            "change",
+            lookupFacility
+        );
+
+
+        mflField.addEventListener(
+            "blur",
+            lookupFacility
+        );
+
+
+        mflField.addEventListener(
+            "input",
+            function () {
+
+                clearTimeout(
+                    mflLookupTimer
+                );
+
+
+                mflLookupTimer =
+                    setTimeout(
+                        function () {
+
+                            /*
+                             * Only lookup after at least
+                             * 3 characters.
+                             */
+
+                            if (
+                                mflField.value.trim()
+                                    .length >= 3
+                            ) {
+
+                                lookupFacility();
+
+                            }
+
+                        },
+                        500
+                    );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       STAFF FORMSET
+       
+       One visible row initially.
+       Additional rows are created with + button.
+    ====================================================== */
+
+    const staffContainer =
+        document.getElementById(
+            "staff-forms"
+        );
+
+    const staffTemplate =
+        document.getElementById(
+            "empty-staff-form"
+        );
+
+    const addStaffButton =
+        document.getElementById(
+            "add-staff-btn"
+        );
+
+    const staffTotalForms =
+        document.getElementById(
+            "id_staff-TOTAL_FORMS"
+        );
+
+
+    function addStaffRow() {
+
+        if (
+            !staffContainer ||
+            !staffTemplate ||
+            !staffTotalForms
+        ) {
+            return;
+        }
+
+
+        const index =
+            parseInt(
+                staffTotalForms.value,
+                10
+            );
+
+
+        const html =
+            staffTemplate.innerHTML
+                .replace(
+                    /__prefix__/g,
+                    index
+                )
+                .replace(
+                    /__number__/g,
+                    index + 1
+                );
+
+
+        const wrapper =
+            document.createElement(
+                "div"
+            );
+
+        wrapper.innerHTML = html;
+
+
+        const row =
+            wrapper.firstElementChild;
+
+
+        if (!row) {
+            return;
+        }
+
+
+        /*
+         * Django empty_form uses __prefix__.
+         */
+
+        row.innerHTML =
+            row.innerHTML.replace(
+                /__prefix__/g,
+                index
+            );
+
+
+        staffContainer.appendChild(
+            row
+        );
+
+
+        staffTotalForms.value =
+            index + 1;
+
+
+        updateStaffRows();
+
+        saveLocalDraft();
+
+    }
+
+
+    function updateStaffRows() {
+
+        const rows =
+            staffContainer
+                ? staffContainer.querySelectorAll(
+                    ".staff-row"
+                )
+                : [];
+
+
+        rows.forEach(
+            function (row, index) {
+
+                const number =
+                    row.querySelector(
+                        ".repeat-row-number"
+                    );
+
+
+                if (number) {
+
+                    number.textContent =
+                        "Staff Member " +
+                        (index + 1);
+
+                }
+
+
+                const removeButton =
+                    row.querySelector(
+                        ".remove-row-button"
+                    );
+
+
+                if (removeButton) {
+
+                    removeButton.style.display =
+                        index === 0
+                            ? "none"
+                            : "inline-block";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (addStaffButton) {
+
+        addStaffButton.addEventListener(
+            "click",
+            addStaffRow
+        );
+
+    }
+
+
+    if (staffContainer) {
+
+        staffContainer.addEventListener(
+            "click",
+            function (event) {
+
+                const button =
+                    event.target.closest(
+                        ".remove-row-button"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const row =
+                    button.closest(
+                        ".staff-row"
+                    );
+
+
+                if (!row) {
+                    return;
+                }
+
+
+                /*
+                 * Do not remove the first row.
+                 * Just clear it.
+                 */
+
+                const rows =
+                    staffContainer.querySelectorAll(
+                        ".staff-row"
+                    );
+
+
+                if (rows.length === 1) {
+
+                    row.querySelectorAll(
+                        "input"
+                    ).forEach(
+                        function (input) {
+
+                            input.value = "";
+
+                        }
+                    );
+
+                    return;
+
+                }
+
+
+                row.remove();
+
+                renumberStaffFields();
+
+                saveLocalDraft();
+
+            }
+        );
+
+    }
+
+
+    function renumberStaffFields() {
+
+        const rows =
+            staffContainer.querySelectorAll(
+                ".staff-row"
+            );
+
+
+        rows.forEach(
+            function (row, newIndex) {
+
+                row.dataset.formIndex =
+                    newIndex;
+
+
+                row.querySelectorAll(
+                    "input"
+                ).forEach(
+                    function (input) {
+
+                        if (input.name) {
+
+                            input.name =
+                                input.name.replace(
+                                    /staff-\d+-/,
+                                    "staff-" +
+                                    newIndex +
+                                    "-"
+                                );
+
+                        }
+
+
+                        if (input.id) {
+
+                            input.id =
+                                input.id.replace(
+                                    /staff-\d+-/,
+                                    "staff-" +
+                                    newIndex +
+                                    "-"
+                                );
+
+                        }
+
+                    }
+                );
+
+
+                const number =
+                    row.querySelector(
+                        ".repeat-row-number"
+                    );
+
+
+                if (number) {
+
+                    number.textContent =
+                        "Staff Member " +
+                        (newIndex + 1);
+
+                }
+
+            }
+        );
+
+
+        if (staffTotalForms) {
+
+            staffTotalForms.value =
+                rows.length;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       POC STATISTICS FORMSET
+    ====================================================== */
+
+    const pocContainer =
+        document.getElementById(
+            "poc-forms"
+        );
+
+    const pocTemplate =
+        document.getElementById(
+            "empty-poc-form"
+        );
+
+    const addPocButton =
+        document.getElementById(
+            "add-poc-btn"
+        );
+
+    const pocTotalForms =
+        document.getElementById(
+            "id_stats-TOTAL_FORMS"
+        );
+
+
+    function addPocRow() {
+
+        if (
+            !pocContainer ||
+            !pocTemplate ||
+            !pocTotalForms
+        ) {
+            return;
+        }
+
+
+        const index =
+            parseInt(
+                pocTotalForms.value,
+                10
+            );
+
+
+        let html =
+            pocTemplate.innerHTML
+                .replace(
+                    /__prefix__/g,
+                    index
+                );
+
+
+        const wrapper =
+            document.createElement(
+                "tbody"
+            );
+
+
+        wrapper.innerHTML =
+            "<table><tbody>" +
+            html +
+            "</tbody></table>";
+
+
+        const row =
+            wrapper.querySelector(
+                ".poc-row"
+            );
+
+
+        if (!row) {
+            return;
+        }
+
+
+        pocContainer.appendChild(
+            row.cloneNode(true)
+        );
+
+
+        pocTotalForms.value =
+            index + 1;
+
+
+        saveLocalDraft();
+
+    }
+
+
+    if (addPocButton) {
+
+        addPocButton.addEventListener(
+            "click",
+            addPocRow
+        );
+
+    }
+
+
+    if (pocContainer) {
+
+        pocContainer.addEventListener(
+            "click",
+            function (event) {
+
+                const button =
+                    event.target.closest(
+                        ".remove-poc-row"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const row =
+                    button.closest(
+                        ".poc-row"
+                    );
+
+
+                if (!row) {
+                    return;
+                }
+
+
+                const rows =
+                    pocContainer.querySelectorAll(
+                        ".poc-row"
+                    );
+
+
+                if (rows.length === 1) {
+
+                    row.querySelectorAll(
+                        "input"
+                    ).forEach(
+                        function (input) {
+
+                            input.value = "";
+
+                        }
+                    );
+
+
+                    return;
+
+                }
+
+
+                row.remove();
+
+                renumberPocRows();
+
+                saveLocalDraft();
+
+            }
+        );
+
+    }
+
+
+    function renumberPocRows() {
+
+        const rows =
+            pocContainer.querySelectorAll(
+                ".poc-row"
+            );
+
+
+        rows.forEach(
+            function (row, index) {
+
+                row.querySelectorAll(
+                    "input, select"
+                ).forEach(
+                    function (input) {
+
+                        if (input.name) {
+
+                            input.name =
+                                input.name.replace(
+                                    /stats-\d+-/,
+                                    "stats-" +
+                                    index +
+                                    "-"
+                                );
+
+                        }
+
+
+                        if (input.id) {
+
+                            input.id =
+                                input.id.replace(
+                                    /stats-\d+-/,
+                                    "stats-" +
+                                    index +
+                                    "-"
+                                );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        if (pocTotalForms) {
+
+            pocTotalForms.value =
+                rows.length;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SECTION 8 TEST KITS
+    ====================================================== */
+
+    const testkitContainer =
+        document.getElementById(
+            "testkit-forms"
+        );
+
+    const testkitTemplate =
+        document.getElementById(
+            "empty-testkit-form"
+        );
+
+    const addTestkitButton =
+        document.getElementById(
+            "add-testkit-btn"
+        );
+
+    const testkitTotalForms =
+        document.getElementById(
+            "id_testkit-TOTAL_FORMS"
+        );
+
+
+    function addTestKit() {
+
+        if (
+            !testkitContainer ||
+            !testkitTemplate ||
+            !testkitTotalForms
+        ) {
+            return;
+        }
+
+
+        const index =
+            parseInt(
+                testkitTotalForms.value,
+                10
+            );
+
+
+        let html =
+            testkitTemplate.innerHTML
+                .replace(
+                    /__prefix__/g,
+                    index
+                )
+                .replace(
+                    /__number__/g,
+                    index + 1
+                );
+
+
+        const wrapper =
+            document.createElement(
+                "div"
+            );
+
+
+        wrapper.innerHTML =
+            html;
+
+
+        const card =
+            wrapper.firstElementChild;
+
+
+        if (!card) {
+            return;
+        }
+
+
+        testkitContainer.appendChild(
+            card
+        );
+
+
+        testkitTotalForms.value =
+            index + 1;
+
+
+        updateTestKitNumbers();
+
+        saveLocalDraft();
+
+    }
+
+
+    function updateTestKitNumbers() {
+
+        if (!testkitContainer) {
+            return;
+        }
+
+
+        const cards =
+            testkitContainer.querySelectorAll(
+                ".test-kit-card"
+            );
+
+
+        cards.forEach(
+            function (card, index) {
+
+                const heading =
+                    card.querySelector(
+                        ".test-kit-card-header h4"
+                    );
+
+
+                if (heading) {
+
+                    heading.textContent =
+                        "Test Kit " +
+                        (index + 1);
+
+                }
+
+
+                const remove =
+                    card.querySelector(
+                        ".remove-test-kit-button"
+                    );
+
+
+                if (remove) {
+
+                    remove.style.display =
+                        index === 0
+                            ? "none"
+                            : "inline-block";
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (addTestkitButton) {
+
+        addTestkitButton.addEventListener(
+            "click",
+            addTestKit
+        );
+
+    }
+
+
+    if (testkitContainer) {
+
+        testkitContainer.addEventListener(
+            "click",
+            function (event) {
+
+                const button =
+                    event.target.closest(
+                        ".remove-test-kit-button"
+                    );
+
+
+                if (!button) {
+                    return;
+                }
+
+
+                const card =
+                    button.closest(
+                        ".test-kit-card"
+                    );
+
+
+                if (!card) {
+                    return;
+                }
+
+
+                const cards =
+                    testkitContainer.querySelectorAll(
+                        ".test-kit-card"
+                    );
+
+
+                if (cards.length === 1) {
+
+                    card.querySelectorAll(
+                        "input"
+                    ).forEach(
+                        function (input) {
+
+                            input.value = "";
+
+                        }
+                    );
+
+
+                    card.querySelectorAll(
+                        "input[type='radio']"
+                    ).forEach(
+                        function (radio) {
+
+                            radio.checked = false;
+
+                        }
+                    );
+
+
+                    return;
+
+                }
+
+
+                card.remove();
+
+                renumberTestKitFields();
+
+                saveLocalDraft();
+
+            }
+        );
+
+    }
+
+
+    function renumberTestKitFields() {
+
+        if (!testkitContainer) {
+            return;
+        }
+
+
+        const cards =
+            testkitContainer.querySelectorAll(
+                ".test-kit-card"
+            );
+
+
+        cards.forEach(
+            function (card, newIndex) {
+
+                card.querySelectorAll(
+                    "input, select, textarea"
+                ).forEach(
+                    function (input) {
+
+                        if (input.name) {
+
+                            input.name =
+                                input.name.replace(
+                                    /testkit-\d+-/,
+                                    "testkit-" +
+                                    newIndex +
+                                    "-"
+                                );
+
+                        }
+
+
+                        if (input.id) {
+
+                            input.id =
+                                input.id.replace(
+                                    /testkit-\d+-/,
+                                    "testkit-" +
+                                    newIndex +
+                                    "-"
+                                );
+
+                        }
+
+
+                        if (
+                            input.type === "radio" &&
+                            input.name
+                        ) {
+
+                            /*
+                             * Radio groups remain correctly grouped
+                             * because the name has been updated.
+                             */
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        if (testkitTotalForms) {
+
+            testkitTotalForms.value =
+                cards.length;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       NON-CONFORMITY FORMSET
+    ====================================================== */
+    const ncContainer=document.getElementById("nc-forms");
+    const ncTemplate=document.getElementById("empty-nc-form");
+    const addNcButton=document.getElementById("add-nc-btn");
+    const ncTotalForms=document.getElementById("id_nc-TOTAL_FORMS");
+    function addNcRow(){
+        if(!ncContainer||!ncTemplate||!ncTotalForms)return;
+        const index=parseInt(ncTotalForms.value||"0",10);
+        const wrapper=document.createElement("tbody");
+        wrapper.innerHTML=ncTemplate.innerHTML.replace(/__prefix__/g,index);
+        const row=wrapper.firstElementChild; if(!row)return;
+        ncContainer.appendChild(row); ncTotalForms.value=index+1; saveLocalDraft();
+    }
+    if(addNcButton)addNcButton.addEventListener("click",addNcRow);
+    if(ncContainer)ncContainer.addEventListener("click",function(event){
+        const button=event.target.closest(".remove-nc-row"); if(!button)return;
+        const row=button.closest(".nc-row"); const rows=ncContainer.querySelectorAll(".nc-row"); if(!row)return;
+        if(rows.length===1){row.querySelectorAll("input,textarea,select").forEach(function(field){field.value="";});return;}
+        row.remove(); renumberNcRows(); saveLocalDraft();
+    });
+    function renumberNcRows(){
+        const rows=ncContainer?ncContainer.querySelectorAll(".nc-row"):[];
+        rows.forEach(function(row,index){row.querySelectorAll("input,textarea,select").forEach(function(field){if(field.name)field.name=field.name.replace(/nc-\d+-/,"nc-"+index+"-");if(field.id)field.id=field.id.replace(/nc-\d+-/,"nc-"+index+"-");});});
+        if(ncTotalForms)ncTotalForms.value=rows.length;
+    }
+
+    /* =====================================================
+       LOCAL DRAFT STORAGE
+
+       This is browser recovery, not yet the database draft.
+
+       It prevents losing a long assessment because of:
+       - accidental refresh
+       - browser crash
+       - closing the tab
+    ====================================================== */
+
+    const assessmentKey =
+        "lab_assessment_local_draft_v2";
+
+
+    const localDraftNotice =
+        document.getElementById(
+            "local-draft-notice"
+        );
+
+    const restoreButton =
+        document.getElementById(
+            "restore-local-draft"
+        );
+
+    const discardButton =
+        document.getElementById(
+            "discard-local-draft"
+        );
+
+
+    function collectFormData() {
+
+        const data = {};
+
+
+        const elements =
+            form.querySelectorAll(
+                "input, select, textarea"
+            );
+
+
+        elements.forEach(
+            function (element) {
+
+                if (!element.name) {
+                    return;
+                }
+
+
+                /*
+                 * Ignore CSRF and management fields.
+                 */
+
+                if (
+                    element.name === "csrfmiddlewaretoken" ||
+                    element.name.includes("-TOTAL_FORMS") ||
+                    element.name.includes("-INITIAL_FORMS") ||
+                    element.name.includes("-MIN_NUM_FORMS") ||
+                    element.name.includes("-MAX_NUM_FORMS")
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    element.type === "radio" ||
+                    element.type === "checkbox"
+                ) {
+
+                    if (!data[element.name]) {
+
+                        data[element.name] = [];
+
+                    }
+
+
+                    if (element.checked) {
+
+                        data[element.name].push(
+                            element.value
+                        );
+
+                    }
+
+                } else {
+
+                    data[element.name] =
+                        element.value;
+
+                }
+
+            }
+        );
+
+
+        return data;
+
+    }
+
+
+    function saveLocalDraft() {
+
+        try {
+
+            const payload = {
+
+                saved_at:
+                    new Date().toISOString(),
+
+                step:
+                    currentStep,
+
+                data:
+                    collectFormData()
+
+            };
+
+
+            localStorage.setItem(
+                assessmentKey,
+                JSON.stringify(payload)
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Could not save local draft:",
+                error
+            );
+
+        }
+
+    }
+
+
+    function restoreFormData(data) {
+
+        Object.keys(data)
+            .forEach(
+                function (name) {
+
+                    const value =
+                        data[name];
+
+
+                    const fields =
+                        form.querySelectorAll(
+                            '[name="' +
+                            CSS.escape(name) +
+                            '"]'
+                        );
+
+
+                    if (!fields.length) {
+                        return;
+                    }
+
+
+                    fields.forEach(
+                        function (field) {
+
+                            if (
+                                field.type === "radio" ||
+                                field.type === "checkbox"
+                            ) {
+
+                                if (
+                                    Array.isArray(value)
+                                ) {
+
+                                    field.checked =
+                                        value.includes(
+                                            field.value
+                                        );
+
+                                } else {
+
+                                    field.checked =
+                                        field.value === value;
+
+                                }
+
+                            } else {
+
+                                field.value =
+                                    value;
+
+                            }
+
+                        }
+                    );
+
+                }
+            );
+
+    }
+
+
+    function checkForLocalDraft() {
+
+        /*
+         * Don't offer browser recovery while editing an existing
+         * server-side assessment.
+         */
+
+        {% if edit_mode %}
+
+            return;
+
+        {% endif %}
+
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    assessmentKey
+                );
+
+
+            if (!saved) {
+                return;
+            }
+
+
+            const payload =
+                JSON.parse(saved);
+
+
+            if (
+                !payload ||
+                !payload.data
+            ) {
+
+                return;
+
+            }
+
+
+            if (localDraftNotice) {
+
+                localDraftNotice.classList.add(
+                    "show"
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Could not inspect local draft:",
+                error
+            );
+
+        }
+
+    }
+
+
+    if (restoreButton) {
+
+        restoreButton.addEventListener(
+            "click",
+            function () {
+
+                try {
+
+                    const saved =
+                        localStorage.getItem(
+                            assessmentKey
+                        );
+
+
+                    if (!saved) {
+                        return;
+                    }
+
+
+                    const payload =
+                        JSON.parse(saved);
+
+
+                    /*
+                     * Rebuild additional rows first.
+                     */
+
+                    rebuildDynamicRows(
+                        payload.data
+                    );
+
+
+                    restoreFormData(
+                        payload.data
+                    );
+
+
+                    if (
+                        typeof payload.step === "number"
+                    ) {
+
+                        showStep(
+                            payload.step
+                        );
+
+                    }
+
+
+                    localDraftNotice.classList.remove(
+                        "show"
+                    );
+
+
+                    setMflStatus(
+                        "Saved browser draft restored.",
+                        "success"
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "Could not restore draft:",
+                        error
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+
+    if (discardButton) {
+
+        discardButton.addEventListener(
+            "click",
+            function () {
+
+                localStorage.removeItem(
+                    assessmentKey
+                );
+
+
+                localDraftNotice.classList.remove(
+                    "show"
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+     * Rebuild rows required by the saved browser draft.
+     */
+
+    function rebuildDynamicRows(data) {
+
+        if (!data) {
+            return;
+        }
+
+
+        /* STAFF */
+
+        const staffIndexes = [];
+
+
+        Object.keys(data)
+            .forEach(
+                function (key) {
+
+                    const match =
+                        key.match(
+                            /^staff-(\d+)-/
+                        );
+
+
+                    if (match) {
+
+                        const index =
+                            parseInt(
+                                match[1],
+                                10
+                            );
+
+
+                        if (
+                            !staffIndexes.includes(
+                                index
+                            )
+                        ) {
+
+                            staffIndexes.push(
+                                index
+                            );
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+        staffIndexes.sort(
+            function (a, b) {
+                return a - b;
+            }
+        );
+
+
+        if (
+            staffTotalForms &&
+            staffIndexes.length > 1
+        ) {
+
+            while (
+                parseInt(
+                    staffTotalForms.value,
+                    10
+                ) < staffIndexes.length
+            ) {
+
+                addStaffRow();
+
+            }
+
+        }
+
+
+        /* POC */
+
+        const pocIndexes = [];
+
+
+        Object.keys(data)
+            .forEach(
+                function (key) {
+
+                    const match =
+                        key.match(
+                            /^stats-(\d+)-/
+                        );
+
+
+                    if (match) {
+
+                        const index =
+                            parseInt(
+                                match[1],
+                                10
+                            );
+
+
+                        if (
+                            !pocIndexes.includes(
+                                index
+                            )
+                        ) {
+
+                            pocIndexes.push(
+                                index
+                            );
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+        pocIndexes.sort(
+            function (a, b) {
+                return a - b;
+            }
+        );
+
+
+        if (
+            pocTotalForms &&
+            pocIndexes.length > 1
+        ) {
+
+            while (
+                parseInt(
+                    pocTotalForms.value,
+                    10
+                ) < pocIndexes.length
+            ) {
+
+                addPocRow();
+
+            }
+
+        }
+
+
+        /* NON-CONFORMITIES */
+        const ncIndexes=[];
+        Object.keys(data).forEach(function(key){const match=key.match(/^nc-(\d+)-/);if(match){const index=parseInt(match[1],10);if(!ncIndexes.includes(index))ncIndexes.push(index);}});
+        ncIndexes.sort(function(a,b){return a-b;});
+        if(ncTotalForms&&ncIndexes.length>1){while(parseInt(ncTotalForms.value,10)<ncIndexes.length)addNcRow();}
+
+        /* TEST KITS */
+
+        const kitIndexes = [];
+
+
+        Object.keys(data)
+            .forEach(
+                function (key) {
+
+                    const match =
+                        key.match(
+                            /^testkit-(\d+)-/
+                        );
+
+
+                    if (match) {
+
+                        const index =
+                            parseInt(
+                                match[1],
+                                10
+                            );
+
+
+                        if (
+                            !kitIndexes.includes(
+                                index
+                            )
+                        ) {
+
+                            kitIndexes.push(
+                                index
+                            );
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+        kitIndexes.sort(
+            function (a, b) {
+                return a - b;
+            }
+        );
+
+
+        if (
+            testkitTotalForms &&
+            kitIndexes.length > 1
+        ) {
+
+            while (
+                parseInt(
+                    testkitTotalForms.value,
+                    10
+                ) < kitIndexes.length
+            ) {
+
+                addTestKit();
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SAVE WHILE USER WORKS
+    ====================================================== */
+
+    let saveTimer = null;
+
+
+    form.addEventListener(
+        "input",
+        function () {
+
+            clearTimeout(
+                saveTimer
+            );
+
+
+            saveTimer =
+                setTimeout(
+                    saveLocalDraft,
+                    700
+                );
+
+        }
+    );
+
+
+    form.addEventListener(
+        "change",
+        function () {
+
+            clearTimeout(
+                saveTimer
+            );
+
+
+            saveTimer =
+                setTimeout(
+                    saveLocalDraft,
+                    300
+                );
+
+        }
+    );
+
+
+    /* =====================================================
+       CLEAR LOCAL DRAFT AFTER SUCCESSFUL SUBMISSION
+
+       We cannot know whether Django accepted the POST until
+       the page changes, so this is intentionally handled
+       using page navigation below.
+    ====================================================== */
+
+    form.addEventListener(
+        "submit",
+        function () {
+
+            /*
+             * Do NOT prevent submission.
+             * Django must receive the form normally.
+             */
+
+            localStorage.removeItem(
+                assessmentKey
+            );
+
+        }
+    );
+
+
+    /* =====================================================
+       SERVER-SIDE VALIDATION DISPLAY
+
+       If Django returns the same page because a form error
+       exists, automatically jump to the page containing
+       the first error.
+    ====================================================== */
+
+    function findFirstErrorStep() {
+
+        const errorElements =
+            form.querySelectorAll(
+                ".errorlist, .field-error"
+            );
+
+
+        if (!errorElements.length) {
+            return null;
+        }
+
+
+        for (
+            let i = 0;
+            i < pages.length;
+            i++
+        ) {
+
+            if (
+                pages[i].querySelector(
+                    ".errorlist, .field-error"
+                )
+            ) {
+
+                return i;
+
+            }
+
+        }
+
+
+        return null;
+
+    }
+
+
+    /* =====================================================
+       INITIALISE
+    ====================================================== */
+
+    updateStaffRows();
+
+    updateTestKitNumbers();
+
+    checkForLocalDraft();
+
+
+    const errorStep =
+        findFirstErrorStep();
+
+
+    if (
+        errorStep !== null
+    ) {
+
+        showStep(
+            errorStep
+        );
+
+        errorBox.classList.add(
+            "show"
+        );
+
+    } else {
+
+        showStep(
+            0
+        );
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

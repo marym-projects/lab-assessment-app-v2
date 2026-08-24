@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        Laboratory Assessment System - Login
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background: #f4f7fa;
+
+            font-family:
+                "Segoe UI",
+                Arial,
+                sans-serif;
+        }
+
+
+        .login-box {
+            width: 420px;
+            max-width: 92%;
+
+            background: white;
+
+            padding: 35px;
+
+            border-radius: 12px;
+
+            box-shadow:
+                0 8px 30px
+                rgba(0, 0, 0, 0.10);
+        }
+
+
+        .logo {
+            text-align: center;
+
+            color: #0b5ed7;
+
+            font-size: 22px;
+
+            font-weight: 700;
+
+            margin-bottom: 8px;
+        }
+
+
+        .subtitle {
+            text-align: center;
+
+            color: #68717b;
+
+            font-size: 13px;
+
+            margin-bottom: 25px;
+        }
+
+
+        h2 {
+            text-align: center;
+
+            color: #20252b;
+
+            margin-bottom: 25px;
+        }
+
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-weight: 600;
+
+            font-size: 14px;
+
+            color: #343a40;
+        }
+
+
+        .login-input {
+            width: 100%;
+
+            padding: 11px 12px;
+
+            border:
+                1px solid #ccd3da;
+
+            border-radius: 6px;
+
+            font-size: 14px;
+        }
+
+
+        .login-input:focus {
+            outline: none;
+
+            border-color: #0b5ed7;
+
+            box-shadow:
+                0 0 0 3px
+                rgba(11, 94, 215, 0.10);
+        }
+
+
+        .login-button {
+            width: 100%;
+
+            padding: 12px;
+
+            margin-top: 8px;
+
+            background: #0b5ed7;
+
+            color: white;
+
+            border: none;
+
+            border-radius: 6px;
+
+            font-size: 15px;
+
+            font-weight: 650;
+
+            cursor: pointer;
+        }
+
+
+        .login-button:hover {
+            background: #084298;
+        }
+
+
+        .error-box {
+            margin-bottom: 18px;
+
+            padding: 12px;
+
+            border-radius: 6px;
+
+            background: #fff1f1;
+
+            border: 1px solid #f0b7b7;
+
+            color: #a61b1b;
+
+            font-size: 13px;
+        }
+
+
+        .help-text {
+            margin-top: 18px;
+
+            text-align: center;
+
+            color: #68717b;
+
+            font-size: 12px;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="login-box">
+
+
+    <div class="logo">
+        Laboratory Assessment System
+    </div>
+
+
+    <div class="subtitle">
+        Laboratory Assessment Management System
+    </div>
+
+
+    <h2>
+        Login
+    </h2>
+
+
+    {% if form.non_field_errors %}
+
+        <div class="error-box">
+
+            {{ form.non_field_errors }}
+
+        </div>
+
+    {% endif %}
+
+
+    <form method="post">
+
+        {% csrf_token %}
+
+
+        <div class="form-group">
+
+            {{ form.role.label_tag }}
+
+            {{ form.role }}
+
+            {% if form.role.errors %}
+
+                <div class="error-box">
+                    {{ form.role.errors }}
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="form-group">
+
+            {{ form.username.label_tag }}
+
+            {{ form.username }}
+
+            {% if form.username.errors %}
+
+                <div class="error-box">
+                    {{ form.username.errors }}
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="form-group">
+
+            {{ form.password.label_tag }}
+
+            {{ form.password }}
+
+            {% if form.password.errors %}
+
+                <div class="error-box">
+                    {{ form.password.errors }}
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <button
+            type="submit"
+            class="login-button"
+        >
+            Login
+        </button>
+
+    </form>
+
+
+    <div class="help-text">
+
+        Select Admin only when using an administrator account.
+
+    </div>
+
+
+</div>
+
+
+</body>
+
+</html>
