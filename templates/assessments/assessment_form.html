@@ -169,6 +169,23 @@
 .section-title {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.section-title > div {
+    margin-left: 0;
+    text-align: left;
+}
+
+.wizard-page[data-step="4"] .section-title {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.wizard-page[data-step="4"] .section-title > div {
+    margin-left: 0;
+    text-align: left;
 }
 
 .section-number {
@@ -801,107 +818,48 @@
             ============================================== -->
 
             <section class="assessment-card">
-
                 <div class="section-title">
-
-                    <span class="section-number">
-                        A1
-                    </span>
-
-                    <div>
-
-                        <h3>
-                            Facility Information
-                        </h3>
-
-                        <p>
-                            Enter the MFL code to retrieve facility
-                            information where available.
-                        </p>
-
+                    <div class="section-heading-left">
+                        <span class="section-number">A1</span>
+                        <div class="section-heading-text">
+                            <h3>Facility Information</h3>
+                            <p>Enter the MFL code to retrieve facility information where available.</p>
+                        </div>
                     </div>
-
                 </div>
-
 
                 <div class="facility-grid">
-
-
-                    <!-- MFL LOOKUP -->
-
                     <div class="mfl-lookup-box">
-
-                        <h4>
-                            Facility lookup
-                        </h4>
-
-                        <p>
-                            Enter the facility's unique MFL code.
-                            The system will retrieve the matching facility
-                            information.
-                        </p>
-
+                        <h4>Facility lookup</h4>
+                        <p>Enter the facility's unique MFL code. The system will retrieve the matching facility information.</p>
                         <div class="field-group">
-
-                            <label for="{{ info_form.facility_mfl_code.id_for_label }}">
-                                Facility MFL code
-                            </label>
-
+                            <label for="{{ info_form.facility_mfl_code.id_for_label }}">Facility MFL code</label>
                             {{ info_form.facility_mfl_code }}
-
                         </div>
-
-                        <div
-                            id="mfl-status"
-                            class="mfl-status"
-                        ></div>
-
+                        <div id="mfl-status" class="mfl-status"></div>
                     </div>
-
-
-                    <!-- FACILITY FIELDS -->
-
-                    {% for field in info_form %}
-
-                        {% if field.name not in a1_excluded_fields and field.name != "facility_mfl_code" %}
-
-                            <div
-                                class="
-                                    field-group
-                                    {% if field.name == 'physical_address' %}
-                                        field-wide
-                                    {% elif field.name == 'poc_tests_conducted' %}
-                                        field-wide
-                                    {% endif %}
-                                "
-                            >
-
-                                <label for="{{ field.id_for_label }}">
-                                    {{ field.label }}
-                                </label>
-
-                                {{ field }}
-
-                                {% if field.help_text %}
-                                    <small class="field-help">
-                                        {{ field.help_text }}
-                                    </small>
-                                {% endif %}
-
-                                {% if field.errors %}
-                                    <div class="field-error">
-                                        {{ field.errors }}
-                                    </div>
-                                {% endif %}
-
-                            </div>
-
-                        {% endif %}
-
-                    {% endfor %}
-
+                    <div class="field-group">
+                        <label for="{{ info_form.facility_name.id_for_label }}">Facility Name</label>
+                        {{ info_form.facility_name }}
+                        {% if info_form.facility_name.help_text %}<small class="field-help">{{ info_form.facility_name.help_text }}</small>{% endif %}
+                        {% if info_form.facility_name.errors %}<div class="field-error">{{ info_form.facility_name.errors }}</div>{% endif %}
+                    </div>
+                    <div class="field-group"><label for="{{ info_form.county_name.id_for_label }}">County</label>{{ info_form.county_name }}</div>
+                    <div class="field-group"><label for="{{ info_form.sub_county.id_for_label }}">Sub-county</label>{{ info_form.sub_county }}</div>
+                    <div class="field-group"><label for="{{ info_form.site.id_for_label }}">Site</label>{{ info_form.site }}</div>
+                    <div class="field-group"><label for="{{ info_form.assessment_type.id_for_label }}">Assessment Type</label>{{ info_form.assessment_type }}</div>
+                    <div class="field-group"><label for="{{ info_form.date_of_assessment.id_for_label }}">Date of Assessment</label>{{ info_form.date_of_assessment }}</div>
+                    <div class="field-group"><label for="{{ info_form.time_of_assessment.id_for_label }}">Time of Assessment</label>{{ info_form.time_of_assessment }}</div>
+                    <div class="field-group"><label for="{{ info_form.date_of_previous_assessment.id_for_label }}">Date of Previous Assessment</label>{{ info_form.date_of_previous_assessment }}</div>
+                    <div class="field-group"><label for="{{ info_form.facility_type.id_for_label }}">Facility Type</label>{{ info_form.facility_type }}</div>
+                    <div class="field-group"><label for="{{ info_form.facility_type_other.id_for_label }}">Facility Type — Other</label>{{ info_form.facility_type_other }}</div>
+                    <div class="field-group"><label for="{{ info_form.level.id_for_label }}">Level</label>{{ info_form.level }}</div>
+                    <div class="field-group"><label for="{{ info_form.affiliation.id_for_label }}">Affiliation</label>{{ info_form.affiliation }}</div>
+                    <div class="field-group"><label for="{{ info_form.affiliation_other.id_for_label }}">Affiliation — Other</label>{{ info_form.affiliation_other }}</div>
+                    <div class="field-group"><label for="{{ info_form.partner.id_for_label }}">Partner</label>{{ info_form.partner }}</div>
+                    <div class="field-group"><label for="{{ info_form.partner_specify.id_for_label }}">Partner — Specify</label>{{ info_form.partner_specify }}</div>
+                    <div class="field-group field-wide"><label for="{{ info_form.physical_address.id_for_label }}">Physical Address</label>{{ info_form.physical_address }}</div>
                 </div>
-
             </section>
 
 
@@ -912,24 +870,13 @@
             <section class="assessment-card">
 
                 <div class="section-title">
-
-                    <span class="section-number">
-                        A2
-                    </span>
-
-                    <div>
-
-                        <h3>
-                            Staff Members
-                        </h3>
-
-                        <p>
-                            Start with one row. Add additional staff
-                            members only when required.
-                        </p>
-
+                    <div class="section-heading-left">
+                        <span class="section-number">A2</span>
+                        <div class="section-heading-text">
+                            <h3>Staff Members</h3>
+                            <p>Start with one row. Add additional staff members only when required.</p>
+                        </div>
                     </div>
-
                 </div>
 
 
@@ -1056,19 +1003,12 @@
             <section class="assessment-card">
 
                 <div class="section-title">
-
-                    <span class="section-number">
-                        A3
-                    </span>
-
-                    <div>
-
-                        <h3>
-                            Interviewee & POC Information
-                        </h3>
-
+                    <div class="section-heading-left">
+                        <span class="section-number">A3</span>
+                        <div class="section-heading-text">
+                            <h3>Interviewee &amp; POC Information</h3>
+                        </div>
                     </div>
-
                 </div>
 
 
