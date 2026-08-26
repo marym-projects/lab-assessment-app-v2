@@ -1742,4 +1742,3 @@ def assessment_report(request, pk):
         "assessments/report.html",
         {"assessment": assessment, "result": score_assessment(assessment)},
     )
-

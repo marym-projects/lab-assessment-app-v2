@@ -718,6 +718,157 @@
         flex: 1;
     }
 }
+
+/* =========================================================
+   SECTION 8 — A3-DRIVEN TEST KIT MATRIX
+========================================================= */
+.section8-matrix-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 18px;
+}
+
+.section8-matrix {
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.section8-matrix th,
+.section8-matrix td {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    vertical-align: middle;
+}
+
+.section8-matrix .section8-question-heading,
+.section8-matrix .section8-row-label {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    min-width: 300px;
+    width: 300px;
+    background: #f5f7f9;
+    font-weight: 700;
+}
+
+.section8-matrix .section8-kit-heading {
+    min-width: 245px;
+    background: #eaf2ff;
+    color: #0b5ed7;
+    text-align: center;
+    font-weight: 800;
+}
+
+.section8-matrix .section8-kit-field {
+    min-width: 245px;
+}
+
+.section8-matrix .section8-kit-field input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.section8-matrix .section8-response-cell {
+    min-width: 245px;
+    text-align: center;
+}
+
+.section8-matrix .section8-response-cell .response-cell ul {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.section8-matrix .section8-response-cell .response-cell label {
+    font-size: 0 !important;
+}
+
+.section8-matrix .section8-response-cell .response-cell label::after {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.section8-matrix .section8-response-cell .response-cell label[data-short="Y"]::after {
+    content: "Y";
+}
+
+.section8-matrix .section8-response-cell .response-cell label[data-short="P"]::after {
+    content: "P";
+}
+
+.section8-matrix .section8-response-cell .response-cell label[data-short="N"]::after {
+    content: "N";
+}
+
+.section8-matrix .section8-response-cell .response-cell label[data-short="NA"]::after {
+    content: "N/A";
+}
+
+.section8-matrix .section8-comment {
+    display: block;
+    margin-top: 8px;
+}
+
+.section8-matrix .section8-comment input {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 12px;
+}
+
+.section8-matrix .section8-comment-label {
+    display: block;
+    margin-bottom: 4px;
+    color: #68717b;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.section8-matrix .section8-pathogen input,
+.section8-matrix .section8-technique input,
+.section8-matrix .section8-kit-name input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.section8-source-cards {
+    display: none !important;
+}
+
+.poc-test-checkboxes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(220px, 1fr));
+    gap: 10px 18px;
+    padding: 14px 16px;
+    background: #f7f9fb;
+    border: 1px solid #dfe4e8;
+    border-radius: 8px;
+}
+
+.poc-test-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.poc-test-checkboxes input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+@media (max-width: 700px) {
+    .poc-test-checkboxes {
+        grid-template-columns: 1fr;
+    }
+}
+
 </style>
 
 
@@ -1641,6 +1792,12 @@
                         {{ testkit_formset.management_form }}
 
 
+                        <div
+                            id="section8-matrix-wrapper"
+                            class="section8-matrix-wrapper"
+                        ></div>
+
+
                         <div id="testkit-forms">
 
                             {% for kit in testkits %}
@@ -1914,6 +2071,7 @@
                             type="button"
                             class="add-button"
                             id="add-testkit-btn"
+                            style="display:none;"
                         >
                             + Add Test Kit
                         </button>
@@ -3233,99 +3391,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     /* =====================================================
-       A3 ↔ A4 POC TEST SYNCHRONISATION
+       A3 — POC TEST MULTI-SELECT
 
-       A3's "List of POC tests conducted at this facility" is
-       intentionally linked to the A4 "Type of Test Performed"
-       rows. This prevents the same information being entered twice
-       and keeps both sections consistent.
+       A3 is the master list. The assessor may select any number
+       of tests. Section 8 reflects exactly those selections.
     ====================================================== */
 
-    const pocTestsField =
-        document.getElementById(
-            "{{ info_form.poc_tests_conducted.id_for_label }}"
+    const pocTestCheckboxes =
+        document.querySelectorAll(
+            'input[type="checkbox"][name="poc_tests_conducted"]'
         );
-
-    /*
-     * A3 is the master list of POC tests.
-     *
-     * The same test names are reflected into:
-     *   A4  -> Type of Test Performed
-     *   Section 8 -> Name of pathogen/condition tested
-     *
-     * We keep existing A4 statistics and Section 8 answers where possible.
-     */
-
-    function getA3TestNames() {
-
-        if (!pocTestsField) {
-            return [];
-        }
-
-        return pocTestsField.value
-            .split(/[,;\n]+/)
-            .map(function (value) {
-                return value.trim();
-            })
-            .filter(function (value, index, array) {
-                return value && array.indexOf(value) === index;
-            });
-
-    }
-
-
-    function setA3TestNames(names) {
-
-        if (!pocTestsField) {
-            return;
-        }
-
-        const uniqueNames = [];
-
-        names.forEach(function (name) {
-
-            const clean =
-                (name || "").trim();
-
-            if (
-                clean &&
-                !uniqueNames.some(function (existing) {
-                    return existing.toLowerCase() === clean.toLowerCase();
-                })
-            ) {
-                uniqueNames.push(clean);
-            }
-
-        });
-
-        pocTestsField.value =
-            uniqueNames.join(", ");
-
-    }
-
-
-    /*
-     * A4 is intentionally independent.
-     *
-     * A4 contains POC testing statistics (period, test type,
-     * tests conducted, positives, negatives and comments). It is
-     * NOT the master list and is not automatically changed by A3.
-     */
-
-
-    function getSection8TestFields() {
-
-        if (!testkitContainer) {
-            return [];
-        }
-
-        return Array.from(
-            testkitContainer.querySelectorAll(
-                'input[name$="-pathogen_condition"], select[name$="-pathogen_condition"]'
-            )
-        );
-
-    }
 
 
     function uniqueNonEmpty(values) {
@@ -3353,553 +3428,519 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    /*
-     * A3 is the master list for Section 8 only.
-     *
-     * Example:
-     * A3 = HIV, Malaria, Hepatitis B
-     *
-     * Section 8 becomes:
-     *   Test Kit 1 -> HIV
-     *   Test Kit 2 -> Malaria
-     *   Test Kit 3 -> Hepatitis B
-     *
-     * Existing Section 8 cards are retained, so their 8.1-8.15
-     * answers are not wiped simply because A3 changes.
-     */
-    function syncA3ToSection8() {
-
-        if (!testkitContainer || !pocTestsField) {
-            return;
-        }
-
-        const names =
-            uniqueNonEmpty(
-                pocTestsField.value.split(/[,;\n]+/)
-            );
-
-        if (!names.length) {
-            return;
-        }
-
-        let fields =
-            getSection8TestFields();
-
-        while (fields.length < names.length) {
-
-            addTestKit();
-
-            fields =
-                getSection8TestFields();
-
-        }
-
-        names.forEach(function (name, index) {
-
-            const field =
-                fields[index];
-
-            if (!field) {
-                return;
-            }
-
-            field.value = name;
-
-        });
-
-        updateTestKitNumbers();
-
-    }
-
-
-    function syncAllFromA3() {
-
-        syncA3ToSection8();
-        saveLocalDraft();
-
-    }
-
-
-    function initialisePocTestSync() {
-
-        if (!pocTestsField) {
-            return;
-        }
-
-        /*
-         * A3 is editable and is the master list for Section 8.
-         */
-        pocTestsField.readOnly = false;
-        pocTestsField.removeAttribute("aria-readonly");
-
-        pocTestsField.addEventListener(
-            "input",
-            function () {
-                syncAllFromA3();
-            }
-        );
-
-        /*
-         * Do NOT touch A4 here.
-         * A4 remains an independent statistics formset.
-         */
-        syncA3ToSection8();
-
-    }
-
-
-    function addPocRow() {
-
-        if (
-            !pocContainer ||
-            !pocTemplate ||
-            !pocTotalForms
-        ) {
-            return;
-        }
-
-        const index =
-            parseInt(
-                pocTotalForms.value,
-                10
-            );
-
-        const html =
-            pocTemplate.innerHTML
-                .replace(
-                    /__prefix__/g,
-                    index
-                );
-
-        const wrapper =
-            document.createElement("tbody");
-
-        wrapper.innerHTML =
-            "<table><tbody>" +
-            html +
-            "</tbody></table>";
-
-        const row =
-            wrapper.querySelector(".poc-row");
-
-        if (!row) {
-            return;
-        }
-
-        pocContainer.appendChild(
-            row.cloneNode(true)
-        );
-
-        pocTotalForms.value =
-            index + 1;
-
-
-        saveLocalDraft();
-
-    }
-
-
-    if (addPocButton) {
-
-        addPocButton.addEventListener(
-            "click",
-            function () {
-
-                addPocRow();
-
-            }
-        );
-
-    }
-
-
-    if (pocContainer) {
-
-        pocContainer.addEventListener(
-            "click",
-            function (event) {
-
-                const button =
-                    event.target.closest(
-                        ".remove-poc-row"
-                    );
-
-                if (!button) {
-                    return;
-                }
-
-                const row =
-                    button.closest(".poc-row");
-
-                if (!row) {
-                    return;
-                }
-
-                const rows =
-                    pocContainer.querySelectorAll(
-                        ".poc-row"
-                    );
-
-                if (rows.length === 1) {
-
-                    row.querySelectorAll(
-                        "input, select, textarea"
-                    ).forEach(function (input) {
-                        input.value = "";
-                    });
-
-                    setA3TestNames([]);
-
-                    return;
-
-                }
-
-                row.remove();
-
-                renumberPocRows();
-
-
-                saveLocalDraft();
-
-            }
-        );
-
-    }
-
-
-    function renumberPocRows() {
-
-        const rows =
-            pocContainer.querySelectorAll(
-                ".poc-row"
-            );
-
-        rows.forEach(function (row, index) {
-
-            row.querySelectorAll(
-                "input, select, textarea"
-            ).forEach(function (input) {
-
-                if (input.name) {
-
-                    input.name =
-                        input.name.replace(
-                            /stats-\d+-/,
-                            "stats-" +
-                            index +
-                            "-"
-                        );
-
-                }
-
-                if (input.id) {
-
-                    input.id =
-                        input.id.replace(
-                            /stats-\d+-/,
-                            "stats-" +
-                            index +
-                            "-"
-                        );
-
-                }
-
+    function getA3TestNames() {
+
+        return Array.from(pocTestCheckboxes)
+            .filter(function (checkbox) {
+                return checkbox.checked;
+            })
+            .map(function (checkbox) {
+                return checkbox.value.trim();
+            })
+            .filter(function (value, index, array) {
+                return value && array.indexOf(value) === index;
             });
 
-        });
+    }
 
-        if (pocTotalForms) {
-            pocTotalForms.value =
-                rows.length;
-        }
+
+    function setA3TestNames(names) {
+
+        const wanted = uniqueNonEmpty(names);
+
+        Array.from(pocTestCheckboxes).forEach(function (checkbox) {
+            checkbox.checked = wanted.some(function (name) {
+                return name.toLowerCase() === checkbox.value.trim().toLowerCase();
+            });
+        });
 
     }
 
 
     /* =====================================================
-       SECTION 8 TEST KITS
+       SECTION 8 MATRIX
+
+       The original Django formset cards remain in the DOM as a
+       hidden source of the real form fields. The visible matrix
+       uses clones of those fields, while changes are mirrored back
+       to the source fields so Django receives the normal formset.
     ====================================================== */
 
     const testkitContainer =
-        document.getElementById(
-            "testkit-forms"
-        );
+        document.getElementById("testkit-forms");
 
     const testkitTemplate =
-        document.getElementById(
-            "empty-testkit-form"
-        );
+        document.getElementById("empty-testkit-form");
 
     const addTestkitButton =
-        document.getElementById(
-            "add-testkit-btn"
-        );
+        document.getElementById("add-testkit-btn");
 
     const testkitTotalForms =
-        document.getElementById(
-            "id_testkit-TOTAL_FORMS"
+        document.getElementById("id_testkit-TOTAL_FORMS");
+
+    const section8MatrixWrapper =
+        document.getElementById("section8-matrix-wrapper");
+
+
+    function getSourceCards() {
+        return testkitContainer
+            ? Array.from(testkitContainer.querySelectorAll(".test-kit-card"))
+            : [];
+    }
+
+
+    function getSourcePathogen(card) {
+        const field = card.querySelector(
+            'input[name$="-pathogen_condition"]'
         );
+        return field ? field.value.trim() : "";
+    }
 
 
-    function addTestKit() {
+    function findSourceCard(testName) {
+        const wanted = (testName || "").trim().toLowerCase();
+        return getSourceCards().find(function (card) {
+            const cardTestName = (card.dataset.testName || '').trim().toLowerCase();
+            return cardTestName === wanted;
+        }) || null;
+    }
 
-        if (
-            !testkitContainer ||
-            !testkitTemplate ||
-            !testkitTotalForms
-        ) {
-            return;
+
+    function addSourceCard(testName) {
+        if (!testkitContainer || !testkitTemplate || !testkitTotalForms) {
+            return null;
         }
 
-        const index =
-            parseInt(
-                testkitTotalForms.value,
-                10
-            );
+        const index = parseInt(testkitTotalForms.value || "0", 10);
+        const html = testkitTemplate.innerHTML
+            .replace(/__prefix__/g, index)
+            .replace(/__number__/g, index + 1);
 
-        const html =
-            testkitTemplate.innerHTML
-                .replace(
-                    /__prefix__/g,
-                    index
-                )
-                .replace(
-                    /__number__/g,
-                    index + 1
-                );
-
-        const wrapper =
-            document.createElement("div");
-
-        wrapper.innerHTML =
-            html;
-
-        const card =
-            wrapper.firstElementChild;
+        const wrapper = document.createElement("div");
+        wrapper.innerHTML = html;
+        const card = wrapper.firstElementChild;
 
         if (!card) {
-            return;
+            return null;
         }
 
-        testkitContainer.appendChild(
-            card
+        card.dataset.testName = testName || "";
+        testkitContainer.appendChild(card);
+        testkitTotalForms.value = index + 1;
+
+        /* A3 supplies the test name for the matrix header.
+         * The pathogen/condition field is intentionally left blank
+         * for the assessor to complete.
+         */
+        const pathogen = card.querySelector(
+            'input[name$="-pathogen_condition"]'
         );
+        if (pathogen && !pathogen.value) {
+            pathogen.value = "";
+        }
 
-        testkitTotalForms.value =
-            index + 1;
-
-        updateTestKitNumbers();
-
-        saveLocalDraft();
-
+        return card;
     }
 
 
-    function updateTestKitNumbers() {
+    function updateCloneIds(root, suffix) {
+        const idMap = {};
 
-        if (!testkitContainer) {
-            return;
-        }
-
-        const cards =
-            testkitContainer.querySelectorAll(
-                ".test-kit-card"
-            );
-
-        cards.forEach(function (card, index) {
-
-            const heading =
-                card.querySelector(
-                    ".test-kit-card-header h4"
-                );
-
-            if (heading) {
-                heading.textContent =
-                    "Test Kit " +
-                    (index + 1);
-            }
-
-            const remove =
-                card.querySelector(
-                    ".remove-test-kit-button"
-                );
-
-            if (remove) {
-                remove.style.display =
-                    index === 0
-                        ? "none"
-                        : "inline-block";
-            }
-
+        root.querySelectorAll("[id]").forEach(function (element) {
+            const oldId = element.id;
+            const newId = oldId + suffix;
+            idMap[oldId] = newId;
+            element.id = newId;
         });
 
-    }
-
-
-    if (addTestkitButton) {
-
-        addTestkitButton.addEventListener(
-            "click",
-            function () {
-
-                addTestKit();
-
-                /*
-                 * If a new empty Section 8 card is manually added,
-                 * keep it available for the next A3 test.
-                 */
-                const a3Names =
-                    getA3TestNames();
-
-                const section8Names =
-                    uniqueNonEmpty(
-                        getSection8TestFields().map(function (field) {
-                            return field.value;
-                        })
-                    );
-
-                if (
-                    section8Names.length > a3Names.length
-                ) {
-                    setA3TestNames(section8Names);
-                    }
-
+        root.querySelectorAll("label[for]").forEach(function (label) {
+            const oldFor = label.getAttribute("for");
+            if (idMap[oldFor]) {
+                label.setAttribute("for", idMap[oldFor]);
             }
-        );
+        });
 
+        root.querySelectorAll("input, select, textarea").forEach(function (field) {
+            field.disabled = false;
+        });
     }
 
 
-    if (testkitContainer) {
-
-        testkitContainer.addEventListener(
-            "click",
-            function (event) {
-
-                const button =
-                    event.target.closest(
-                        ".remove-test-kit-button"
-                    );
-
-                if (!button) {
-                    return;
-                }
-
-                const card =
-                    button.closest(
-                        ".test-kit-card"
-                    );
-
-                if (!card) {
-                    return;
-                }
-
-                const cards =
-                    testkitContainer.querySelectorAll(
-                        ".test-kit-card"
-                    );
-
-                if (cards.length === 1) {
-
-                    card.querySelectorAll(
-                        "input[type='text'], input[type='number'], input[type='search'], select, textarea"
-                    ).forEach(function (input) {
-                        input.value = "";
-                    });
-
-                    card.querySelectorAll(
-                        "input[type='radio']"
-                    ).forEach(function (radio) {
-                        radio.checked = false;
-                    });
-
-                    setA3TestNames([]);
-
-                    return;
-
-                }
-
-                card.remove();
-
-                renumberTestKitFields();
-
-                /*
-                 * Rebuild the master list from the remaining Section 8
-                 * test names so A3 and A4 remain synchronized.
-                 */
-                const names =
-                    uniqueNonEmpty(
-                        getSection8TestFields().map(function (field) {
-                            return field.value;
-                        })
-                    );
-
-                setA3TestNames(names);
-
-                saveLocalDraft();
-
+    function setResponseShortLabels(root) {
+        root.querySelectorAll(".response-cell label").forEach(function (label) {
+            const input = label.querySelector('input[type="radio"]');
+            if (!input) {
+                return;
             }
-        );
 
+            const value = (input.value || "").toUpperCase();
+            let short = "";
+
+            if (value === "Y" || value === "YES") {
+                short = "Y";
+            } else if (value === "P" || value === "PARTIAL") {
+                short = "P";
+            } else if (value === "N" || value === "NO") {
+                short = "N";
+            } else if (value === "NA" || value === "N/A") {
+                short = "NA";
+            }
+
+            if (short) {
+                label.setAttribute("data-short", short);
+            }
+        });
     }
 
 
-    function renumberTestKitFields() {
+    function cloneForMatrix(element, suffix) {
+        const clone = element.cloneNode(true);
+        updateCloneIds(clone, suffix);
+        setResponseShortLabels(clone);
 
-        if (!testkitContainer) {
+        if (element.name && element.name.endsWith("-pathogen_condition")) {
+            clone.readOnly = true;
+            clone.setAttribute("aria-readonly", "true");
+        }
+
+        return clone;
+    }
+
+
+    function syncMatrixFieldToSource(field) {
+        if (!field || !field.name || !testkitContainer) {
             return;
         }
 
-        const cards =
-            testkitContainer.querySelectorAll(
-                ".test-kit-card"
-            );
+        const source = testkitContainer.querySelector(
+            '[name="' + CSS.escape(field.name) + '"]'
+        );
 
-        cards.forEach(function (card, newIndex) {
+        if (!source || source === field) {
+            return;
+        }
 
-            card.querySelectorAll(
-                "input, select, textarea"
-            ).forEach(function (input) {
+        if (field.type === "radio" || field.type === "checkbox") {
+            source.checked = field.checked;
+        } else {
+            source.value = field.value;
+        }
+    }
 
-                if (input.name) {
 
-                    input.name =
-                        input.name.replace(
-                            /testkit-\d+-/,
-                            "testkit-" +
-                            newIndex +
-                            "-"
-                        );
+    function updateMatrixComments(matrix) {
+        matrix.querySelectorAll(".section8-response-cell").forEach(function (cell) {
+            const selected = cell.querySelector('input[type="radio"]:checked');
+            const comment = cell.querySelector(".section8-comment");
 
+            if (!comment) {
+                return;
+            }
+
+            if (
+                selected &&
+                ["N", "P", "NO", "PARTIAL"].includes(
+                    (selected.value || "").toUpperCase()
+                )
+            ) {
+                comment.style.display = "block";
+            } else {
+                comment.style.display = "none";
+            }
+        });
+    }
+
+
+    function buildSection8Matrix() {
+        if (!section8MatrixWrapper || !testkitContainer) {
+            return;
+        }
+
+        const cards = getSourceCards();
+
+        if (!cards.length) {
+            section8MatrixWrapper.innerHTML = "";
+            return;
+        }
+
+        const matrix = document.createElement("table");
+        matrix.className = "section8-matrix";
+        matrix.id = "section8-matrix";
+
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+
+        const questionHeading = document.createElement("th");
+        questionHeading.className = "section8-question-heading";
+        questionHeading.textContent = "";
+        headerRow.appendChild(questionHeading);
+
+        cards.forEach(function (card, index) {
+            const th = document.createElement("th");
+            th.className = "section8-kit-heading";
+            th.textContent = card.dataset.testName || ("Test Kit " + (index + 1));
+            headerRow.appendChild(th);
+        });
+
+        thead.appendChild(headerRow);
+        matrix.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+
+        function addFieldRow(label, selector, className) {
+            const row = document.createElement("tr");
+            const labelCell = document.createElement("th");
+            labelCell.className = "section8-row-label";
+            labelCell.textContent = label;
+            row.appendChild(labelCell);
+
+            cards.forEach(function (card, index) {
+                const cell = document.createElement("td");
+                cell.className = "section8-kit-field " + className;
+                const source = card.querySelector(selector);
+                if (source) {
+                    cell.appendChild(cloneForMatrix(source, "__matrix_" + index));
                 }
-
-                if (input.id) {
-
-                    input.id =
-                        input.id.replace(
-                            /testkit-\d+-/,
-                            "testkit-" +
-                            newIndex +
-                            "-"
-                        );
-
-                }
-
+                row.appendChild(cell);
             });
 
+            tbody.appendChild(row);
+        }
+
+        addFieldRow(
+            "Pathogen / condition",
+            'input[name$="-pathogen_condition"]',
+            "section8-pathogen"
+        );
+
+        addFieldRow(
+            "Technique",
+            'input[name$="-technique"]',
+            "section8-technique"
+        );
+
+        addFieldRow(
+            "Name of test kit",
+            'input[name$="-kit_name"]',
+            "section8-kit-name"
+        );
+
+        const responseHeadingRow = document.createElement("tr");
+        const responseHeading = document.createElement("th");
+        responseHeading.className = "section8-row-label";
+        responseHeading.textContent = "Response";
+        responseHeadingRow.appendChild(responseHeading);
+
+        cards.forEach(function () {
+            const cell = document.createElement("td");
+            cell.className = "section8-kit-field section8-response-legend";
+            cell.innerHTML =
+                "<strong>Y</strong> = Yes &nbsp; <strong>P</strong> = Partial &nbsp; <strong>N</strong> = No";
+            responseHeadingRow.appendChild(cell);
+        });
+
+        tbody.appendChild(responseHeadingRow);
+
+        const firstCardRows = cards[0].querySelectorAll(
+            ".checklist-table tbody tr"
+        );
+
+        firstCardRows.forEach(function (firstRow, questionIndex) {
+            const row = document.createElement("tr");
+            const questionCell = document.createElement("th");
+            questionCell.className = "section8-row-label";
+
+            const questionText = firstRow.querySelector(".question-cell");
+            if (questionText) {
+                questionCell.innerHTML = questionText.innerHTML;
+            }
+
+            row.appendChild(questionCell);
+
+            cards.forEach(function (card, cardIndex) {
+                const sourceRows = card.querySelectorAll(
+                    ".checklist-table tbody tr"
+                );
+                const sourceRow = sourceRows[questionIndex];
+                const cell = document.createElement("td");
+                cell.className = "section8-response-cell";
+
+                if (sourceRow) {
+                    const responseSource = sourceRow.querySelector(".response-cell");
+                    const commentSource = sourceRow.querySelector(".comment-cell");
+
+                    if (responseSource) {
+                        cell.appendChild(
+                            cloneForMatrix(
+                                responseSource,
+                                "__matrix_" + cardIndex + "_" + questionIndex
+                            )
+                        );
+                    }
+
+                    if (commentSource) {
+                        const commentWrapper = document.createElement("div");
+                        commentWrapper.className = "section8-comment";
+
+                        const commentLabel = document.createElement("span");
+                        commentLabel.className = "section8-comment-label";
+                        commentLabel.textContent =
+                            "Reason / comment (for Partial or No)";
+                        commentWrapper.appendChild(commentLabel);
+
+                        commentWrapper.appendChild(
+                            cloneForMatrix(
+                                commentSource,
+                                "__matrix_comment_" + cardIndex + "_" + questionIndex
+                            )
+                        );
+
+                        cell.appendChild(commentWrapper);
+                    }
+                }
+
+                row.appendChild(cell);
+            });
+
+            tbody.appendChild(row);
+        });
+
+        matrix.appendChild(tbody);
+        section8MatrixWrapper.innerHTML = "";
+        section8MatrixWrapper.appendChild(matrix);
+
+        /* Only the visible matrix submits the test-kit fields. */
+        cards.forEach(function (card) {
+            card.querySelectorAll("input, select, textarea").forEach(function (field) {
+                field.disabled = true;
+            });
+        });
+
+        matrix.addEventListener("input", function (event) {
+            syncMatrixFieldToSource(event.target);
+            saveLocalDraft();
+        });
+
+        matrix.addEventListener("change", function (event) {
+            syncMatrixFieldToSource(event.target);
+            updateMatrixComments(matrix);
+            saveLocalDraft();
+        });
+
+        updateMatrixComments(matrix);
+    }
+
+
+    function renumberSourceCards() {
+        const cards = getSourceCards();
+
+        cards.forEach(function (card, newIndex) {
+            card.querySelectorAll("input, select, textarea").forEach(function (field) {
+                if (field.name) {
+                    field.name = field.name.replace(
+                        /testkit-\d+-/,
+                        "testkit-" + newIndex + "-"
+                    );
+                }
+
+                if (field.id) {
+                    field.id = field.id.replace(
+                        /testkit-\d+-/,
+                        "testkit-" + newIndex + "-"
+                    );
+                }
+            });
         });
 
         if (testkitTotalForms) {
-            testkitTotalForms.value =
-                cards.length;
+            testkitTotalForms.value = cards.length;
         }
-
     }
 
 
-    /*
-     * Initialise after all formset elements exist.
-     */
+    function syncA3ToSection8() {
+        if (!testkitContainer || !section8MatrixWrapper) {
+            return;
+        }
+
+        const names = getA3TestNames();
+        const existingCards = getSourceCards();
+
+        /* Existing cards from a previously saved assessment do not have
+         * the browser-only data-test-name marker. Match them to A3 by
+         * position once, while preserving their pathogen/condition,
+         * technique, kit name and responses.
+         */
+        existingCards.forEach(function (card, index) {
+            if (!card.dataset.testName && names[index]) {
+                card.dataset.testName = names[index];
+            }
+        });
+
+        /* Remove every source card whose A3 test is no longer selected. */
+        existingCards.forEach(function (card) {
+            const name = (card.dataset.testName || "").trim();
+            const stillSelected = names.some(function (selected) {
+                return selected.toLowerCase() === name.toLowerCase();
+            });
+
+            if (!name || !stillSelected) {
+                card.remove();
+            }
+        });
+
+        /* Add a source card for every newly selected test. */
+        names.forEach(function (name) {
+            if (!findSourceCard(name)) {
+                addSourceCard(name);
+            }
+        });
+
+        /* Keep Section 8 in exactly the same order as A3. */
+        names.forEach(function (name) {
+            const card = findSourceCard(name);
+            if (card) {
+                testkitContainer.appendChild(card);
+            }
+        });
+
+        renumberSourceCards();
+
+        /* A3 supplies only the test name shown in the column header.
+         * It must NOT populate the pathogen/condition field. That field
+         * is intentionally blank for the assessor to enter the pathogen
+         * or condition (for example, HIV).
+         */
+        buildSection8Matrix();
+    }
+
+
+    function initialisePocTestSync() {
+        if (!pocTestCheckboxes.length) {
+            return;
+        }
+
+        Array.from(pocTestCheckboxes).forEach(function (checkbox) {
+            checkbox.addEventListener("change", function () {
+                syncA3ToSection8();
+                saveLocalDraft();
+            });
+        });
+
+        if (testkitContainer) {
+            testkitContainer.classList.add("section8-source-cards");
+        }
+
+        syncA3ToSection8();
+    }
+
+
+    /* A3 controls the number of Section 8 test-kit columns. */
+    if (addTestkitButton) {
+        addTestkitButton.style.display = "none";
+    }
+
+
     initialisePocTestSync();
 
 /* =====================================================
@@ -4228,6 +4269,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         payload.data
                     );
 
+                    if (typeof syncA3ToSection8 === "function") {
+                        syncA3ToSection8();
+                    }
+
 
                     if (
                         typeof payload.step === "number"
@@ -4443,67 +4488,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const kitIndexes = [];
 
-
-        Object.keys(data)
-            .forEach(
-                function (key) {
-
-                    const match =
-                        key.match(
-                            /^testkit-(\d+)-/
-                        );
-
-
-                    if (match) {
-
-                        const index =
-                            parseInt(
-                                match[1],
-                                10
-                            );
-
-
-                        if (
-                            !kitIndexes.includes(
-                                index
-                            )
-                        ) {
-
-                            kitIndexes.push(
-                                index
-                            );
-
-                        }
-
-                    }
-
+        Object.keys(data).forEach(function (key) {
+            const match = key.match(/^testkit-(\d+)-/);
+            if (match) {
+                const index = parseInt(match[1], 10);
+                if (!kitIndexes.includes(index)) {
+                    kitIndexes.push(index);
                 }
-            );
-
-
-        kitIndexes.sort(
-            function (a, b) {
-                return a - b;
             }
-        );
+        });
 
+        kitIndexes.sort(function (a, b) {
+            return a - b;
+        });
 
-        if (
-            testkitTotalForms &&
-            kitIndexes.length > 1
-        ) {
-
+        if (testkitTotalForms) {
             while (
-                parseInt(
-                    testkitTotalForms.value,
-                    10
-                ) < kitIndexes.length
+                parseInt(testkitTotalForms.value || "0", 10) < kitIndexes.length
             ) {
-
-                addTestKit();
-
+                addSourceCard("");
             }
 
+            renumberSourceCards();
         }
 
     }

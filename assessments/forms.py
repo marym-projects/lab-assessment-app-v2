@@ -1,4 +1,5 @@
 from datetime import date
+import re
 
 from django import forms
 from django.contrib.auth import authenticate
@@ -136,6 +137,45 @@ class FacilityLookupForm(forms.Form):
 # =========================================================
 
 class AssessmentInfoForm(forms.ModelForm):
+
+    POC_TEST_CHOICES = [
+        ("CRAG", "CRAG"),
+        ("CRP", "CRP"),
+        ("D-Dimers", "D-Dimers"),
+        ("HBA1C", "HBA1C"),
+        ("Hepatitis A", "Hepatitis A"),
+        ("Hepatitis B", "Hepatitis B"),
+        ("Hepatitis C", "Hepatitis C"),
+        ("HIV TrinScreen", "HIV TrinScreen"),
+        ("HIV Standard Q", "HIV Standard Q"),
+        ("HIV First Response", "HIV First Response"),
+        ("HIV One Step", "HIV One Step"),
+        ("LF LAM", "LF LAM"),
+        ("TB LAMP", "TB LAMP"),
+        ("GeneXpert MTB/RIF", "GeneXpert MTB/RIF"),
+        ("Malaria RDT", "Malaria RDT"),
+        ("Random Blood Sugar", "Random Blood Sugar"),
+        ("Rota AdenoviRus", "Rota AdenoviRus"),
+        ("Salmonella Antigen Test", "Salmonella Antigen Test"),
+        ("VDRL", "VDRL"),
+        ("Thyroid TSH", "Thyroid TSH"),
+        ("Thyroid T4", "Thyroid T4"),
+        ("Urinalysis", "Urinalysis"),
+        ("Hemoglobin", "Hemoglobin"),
+        ("Pregnancy Test", "Pregnancy Test"),
+        ("PSA", "PSA"),
+    ]
+
+    poc_tests_conducted = forms.MultipleChoiceField(
+        required=False,
+        label="List of POC tests conducted at this facility",
+        choices=POC_TEST_CHOICES,
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                "class": "poc-test-checkboxes",
+            }
+        ),
+    )
 
     class Meta:
         model = Assessment
@@ -304,13 +344,6 @@ class AssessmentInfoForm(forms.ModelForm):
                 }
             ),
 
-            "poc_tests_conducted": forms.Textarea(
-                attrs={
-                    "rows": 3,
-                    "class": "form-control",
-                }
-            ),
-
             "assessors": forms.TextInput(
                 attrs={
                     "class": "form-control",
@@ -354,12 +387,30 @@ class AssessmentInfoForm(forms.ModelForm):
             field.required = False
 
         # When editing an existing assessment, preserve
-        # its linked facility.
+        # its linked facility and restore the saved A3 test list
+        # into the checkbox field.
         if self.instance and self.instance.pk:
             if self.instance.facility_id:
                 self.fields["facility"].initial = (
                     self.instance.facility_id
                 )
+
+            raw_tests = (
+                self.instance.poc_tests_conducted
+                or ""
+            )
+
+            saved_tests = [
+                value.strip()
+                for value in re.split(r"[,;\n]+", raw_tests)
+                if value.strip()
+            ]
+
+            self.initial["poc_tests_conducted"] = saved_tests
+
+    def clean_poc_tests_conducted(self):
+        values = self.cleaned_data.get("poc_tests_conducted") or []
+        return ", ".join(values)
 
     def clean_date_of_assessment(self):
         value = self.cleaned_data.get(
@@ -472,6 +523,19 @@ class AssessmentInfoForm(forms.ModelForm):
             cleaned_data[
                 "sub_county"
             ] = facility.sub_county
+
+        # =====================================================
+        # A3 — STORE MULTI-SELECT AS THE EXISTING TEXT VALUE
+        # =====================================================
+
+        selected_tests = cleaned_data.get(
+            "poc_tests_conducted"
+        ) or []
+
+        if isinstance(selected_tests, (list, tuple)):
+            cleaned_data["poc_tests_conducted"] = ", ".join(
+                selected_tests
+            )
 
         # =====================================================
         # DATE VALIDATION
